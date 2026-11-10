@@ -23,7 +23,7 @@ __pycache__/
 *.tfstate.*
 *.tfvars
 !*.example.tfvars
-.terraform.lock.hcl
+
 
 # OS / editor
 .DS_Store
