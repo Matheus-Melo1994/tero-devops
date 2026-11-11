@@ -22,6 +22,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+
+  # 5.3 SAST: análisis estático de seguridad del código (Go, TS, Python).
+  # Reglas: p/default + OWASP top 10. Falla si encuentra hallazgos de severidad ERROR.
+  sast:
+    name: SAST (Semgrep)
+    runs-on: ubuntu-latest
+    needs: gitleaks
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+      - run: semgrep scan --config p/default --config p/owasp-top-ten --severity ERROR --error app/src
+
   # TEMPORAL: gate informativo (exit-code 0) hasta remediar los hallazgos del primer
   # escaneo (catalog 29, orders 22, checkout 82). Volver a exit-code 1 al remediar.
   # 5.1 SCA: escanea dependencias (go.sum, package.json, requirements.txt).
@@ -29,7 +42,7 @@ jobs:
   sca:
     name: Dependencias (Trivy fs)
     runs-on: ubuntu-latest
-    needs: gitleaks
+    needs: [gitleaks, sast]
     steps:
       - uses: actions/checkout@v4
       - uses: aquasecurity/trivy-action@v0.36.0
