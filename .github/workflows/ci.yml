@@ -1,6 +1,7 @@
 # Pipeline de CI: corre en cada PR y en cada push a main.
-# Etapas: secretos (Gitleaks) → SCA (Trivy fs) → build + escaneo de imagen (Trivy image) → publicar en GHCR
-# Próximas: Semgrep (SAST), SonarCloud (calidad), deploy.
+# Etapas: secretos → SAST → SCA → build + escaneo de imagen → publicar en GHCR.
+# Las pruebas de integración también deben aprobarse antes de publicar.
+# Próximas: SonarCloud (calidad), gates bloqueantes de Trivy, deploy.
 
 name: CI
 
@@ -85,12 +86,74 @@ jobs:
           exit-code: 0
           format: table
 
+  integration:
+    name: Pruebas de integración
+    runs-on: ubuntu-latest
+    needs: gitleaks
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      COMPOSE_PROJECT_NAME: tero-integration
+      COMPOSE_FILE: app/docker-compose.yml:app/tests/integration/compose.yml
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preparar credenciales efímeras
+        shell: bash
+        run: |
+          umask 077
+          {
+            echo 'POSTGRES_USER=retail_user'
+            echo 'ADMIN_USERNAME=admin'
+          } > "$RUNNER_TEMP/tero-ci.env"
+          for key in POSTGRES_PASSWORD ADMIN_PASSWORD ADMIN_JWT_SECRET; do
+            value="$(openssl rand -hex 32)"
+            echo "::add-mask::$value"
+            printf '%s=%s\n' "$key" "$value" >> "$RUNNER_TEMP/tero-ci.env"
+          done
+      - name: Ejecutar las dos pruebas sobre Tero
+        shell: bash
+        run: |
+          docker compose --env-file "$RUNNER_TEMP/tero-ci.env" up \
+            --build --abort-on-container-exit --exit-code-from integration-tests \
+            --attach integration-tests integration-tests
+      - name: Recoger resultados y logs
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/tero-test-results"
+          docker compose --env-file "$RUNNER_TEMP/tero-ci.env" logs \
+            --no-color --no-log-prefix integration-tests > "$RUNNER_TEMP/tero-test-results/integration.tap"
+          docker compose --env-file "$RUNNER_TEMP/tero-ci.env" logs \
+            --no-color --timestamps > "$RUNNER_TEMP/tero-test-results/compose.log"
+          # Los valores generados son hexadecimales; también se ocultan en los archivos.
+          while IFS='=' read -r key value; do
+            case "$key" in
+              *_PASSWORD|*_SECRET)
+                sed -i "s/$value/[REDACTED]/g" "$RUNNER_TEMP/tero-test-results/"* ;;
+            esac
+          done < "$RUNNER_TEMP/tero-ci.env"
+      - name: Guardar evidencia de las pruebas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-results
+          path: ${{ runner.temp }}/tero-test-results/
+          retention-days: 30
+          if-no-files-found: warn
+      - name: Retirar el entorno temporal
+        if: always()
+        shell: bash
+        run: |
+          docker compose --env-file "$RUNNER_TEMP/tero-ci.env" down --volumes --remove-orphans
+          rm -f "$RUNNER_TEMP/tero-ci.env"
+
   # 3.2 Publicar en registry: solo en push a main (no en PRs).
   # Las imágenes quedan en ghcr.io/matheus-melo1994/tero-<servicio>:<sha> y :latest
   publish:
     name: Publicar ${{ matrix.service }}
     runs-on: ubuntu-latest
-    needs: build
+    needs: [build, integration]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: read
