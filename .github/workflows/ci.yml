@@ -1,0 +1,119 @@
+# Pipeline de CI: corre en cada PR y en cada push a main.
+# Etapas: secretos (Gitleaks) → SCA (Trivy fs) → build + escaneo de imagen (Trivy image) → publicar en GHCR
+# Próximas: Semgrep (SAST), SonarCloud (calidad), deploy.
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  # 5.4 Detección de secretos: falla si encuentra credenciales en el repo o el historial
+  gitleaks:
+    name: Secretos (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+  # 5.3 SAST: análisis estático de seguridad del código (Go, TS, Python).
+  # Reglas: p/default + OWASP top 10. Falla si encuentra hallazgos de severidad ERROR.
+  sast:
+    name: SAST (Semgrep)
+    runs-on: ubuntu-latest
+    needs: gitleaks
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+      - run: semgrep scan --config p/default --config p/owasp-top-ten --severity ERROR --error app/src
+
+  # TEMPORAL: gate informativo (exit-code 0) hasta remediar los hallazgos del primer
+  # escaneo (catalog 29, orders 22, checkout 82). Volver a exit-code 1 al remediar.
+  # 5.1 SCA: escanea dependencias (go.sum, package.json, requirements.txt).
+  # Quality gate de la letra: bloquea CRITICAL/HIGH que tengan parche disponible.
+  sca:
+    name: Dependencias (Trivy fs)
+    runs-on: ubuntu-latest
+    needs: [gitleaks, sast]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: app/src
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: 0
+          format: table
+
+  # Build de las 6 imágenes en paralelo + 5.2 escaneo de cada imagen antes de publicar
+  build:
+    name: Build ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    needs: sca
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [catalog, orders, ui, admin, checkout, cart]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: app/src/${{ matrix.service }}
+          push: false
+          load: true
+          tags: tero/${{ matrix.service }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Escaneo de imagen (Trivy image)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: image
+          image-ref: tero/${{ matrix.service }}:${{ github.sha }}
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: 0
+          format: table
+
+  # 3.2 Publicar en registry: solo en push a main (no en PRs).
+  # Las imágenes quedan en ghcr.io/matheus-melo1994/tero-<servicio>:<sha> y :latest
+  publish:
+    name: Publicar ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        service: [catalog, orders, ui, admin, checkout, cart]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Login a GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build y push
+        uses: docker/build-push-action@v6
+        with:
+          context: app/src/${{ matrix.service }}
+          push: true
+          tags: |
+            ghcr.io/matheus-melo1994/tero-${{ matrix.service }}:${{ github.sha }}
+            ghcr.io/matheus-melo1994/tero-${{ matrix.service }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
