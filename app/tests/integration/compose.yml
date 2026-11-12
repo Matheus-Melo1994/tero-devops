@@ -1,0 +1,24 @@
+# Se combina con app/docker-compose.yml; las rutas se resuelven desde app/.
+# El proyecto tero-integration mantiene sus propios contenedores y volumen.
+services:
+  db:
+    ports: !reset []
+  redis:
+    ports: !reset []
+  ui:
+    ports: !reset []
+  admin:
+    ports: !reset []
+
+  integration-tests:
+    image: node:22-alpine
+    working_dir: /tests
+    volumes:
+      - ./tests/integration:/tests:ro
+    environment:
+      TERO_BASE_URL: http://ui:8080
+      TERO_REQUEST_TIMEOUT_MS: "10000"
+      TERO_READY_TIMEOUT_MS: "90000"
+    command: ["node", "--test", "--test-concurrency=1", "--test-reporter=tap", "tero.test.mjs"]
+    depends_on:
+      - ui
