@@ -1,7 +1,7 @@
 # Pipeline de CI: corre en cada PR y en cada push a main.
-# Etapas: secretos → SAST → SCA → build + escaneo de imagen → publicar en GHCR.
+# Etapas: secretos → SAST + calidad + SCA → build + escaneo de imagen → pruebas de integración → publicar en GHCR.
 # Las pruebas de integración también deben aprobarse antes de publicar.
-# Próximas: SonarCloud (calidad), gates bloqueantes de Trivy, deploy.
+# Próximas: gates bloqueantes de Trivy (tras remediación), deploy.
 
 name: CI
 
@@ -35,6 +35,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: semgrep scan --config p/default --config p/owasp-top-ten --severity ERROR --error app/src
+
+  # 4.2 / 4.3 Calidad de código: SonarCloud con quality gate "Sonar way" (umbrales de bugs, smells, duplicación)
+  quality:
+    name: Calidad (SonarCloud)
+    runs-on: ubuntu-latest
+    needs: gitleaks
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   # TEMPORAL: gate informativo (exit-code 0) hasta remediar los hallazgos del primer
   # escaneo (catalog 29, orders 22, checkout 82). Volver a exit-code 1 al remediar.
