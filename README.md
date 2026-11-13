@@ -1,75 +1,119 @@
-# tero-devops
+# Tero DevOps
 
-Tero es una tienda compuesta por UI, Admin, Catalog, Carts, Checkout y Orders, con PostgreSQL y Redis. El código y Docker Compose están en `app/`.
+Tero es un marketplace compuesto por 6 microservicios (UI, Admin, Catalog, Carts, Checkout, Orders) con PostgreSQL y Redis. Este repositorio contiene la aplicación, su infraestructura como código, los pipelines de CI/CD y la documentación del obligatorio de DevOps (ORT, 2026).
+
+Equipo: Matheus Melo, Gastón Da Rosa.
+
+## Estructura del repositorio
+
+```
+tero-devops/
+├── app/                      aplicación
+│   ├── src/<servicio>/       código y Dockerfile de cada microservicio
+│   ├── tests/integration/    pruebas de integración (ver su README)
+│   ├── docker-compose.yml    entorno local completo
+│   └── .env.example          plantilla de variables de entorno
+├── infra/                    infraestructura en Terraform (ver su README)
+├── .github/workflows/
+│   ├── ci.yml                pipeline de CI: seguridad, calidad, build, tests, publicación
+│   └── terraform.yml         validación de IaC
+├── docs/evidencias/          capturas y logs por bloque de la letra
+└── sonar-project.properties  configuración de SonarCloud
+```
+
+## Prerequisitos
+
+| Para | Herramienta |
+|---|---|
+| Levantar la app local | Docker Desktop (Compose v2.24+) |
+| Trabajar en la infraestructura | Terraform >= 1.6, AWS CLI |
+| Desarrollar un servicio | Go 1.24 (catalog, orders) · Node 22 (ui, admin, checkout) · Python 3.12 (carts) |
+
+No hace falta instalar Go, Node ni Python para levantar la app: todo corre en contenedores.
+
+## Variables de entorno
+
+Se definen en `app/.env`, que **no se versiona** (está en `.gitignore`). Copiar la plantilla y completar:
+
+```bash
+cp app/.env.example app/.env
+```
+
+| Variable | Uso | Nota |
+|---|---|---|
+| `POSTGRES_USER` | Usuario de PostgreSQL para todos los servicios | Mantener `retail_user`: lo usa `app/init-db.sql` |
+| `POSTGRES_PASSWORD` | Contraseña de PostgreSQL | Elegir una propia |
+| `ADMIN_USERNAME` | Usuario del panel Admin | |
+| `ADMIN_PASSWORD` | Contraseña del panel Admin | Elegir una propia |
+| `ADMIN_JWT_SECRET` | Secreto para firmar sesiones de Admin | Cadena aleatoria larga |
+
+Cambiar la contraseña en `.env` no modifica una base ya inicializada: hay que borrar el volumen (`docker compose down -v`).
+
+En AWS estos valores no salen de `.env`: se guardan en Secrets Manager y se inyectan en las tareas de ECS (pendiente, bloque 7).
 
 ## Ejecución local
 
-Requisitos: Docker con motor Linux y Docker Compose 2.24.4 o superior. Desde la raíz del repositorio:
+Desde la raíz del repositorio, con `app/.env` completo:
 
-```powershell
-Copy-Item app/.env.example app/.env
+```bash
+docker compose --env-file app/.env -f app/docker-compose.yml up -d --build
 ```
 
-Completar `app/.env` antes del primer arranque. Conservar `POSTGRES_USER=retail_user`, utilizado por `app/init-db.sql`. Definir contraseñas propias para `POSTGRES_PASSWORD` y `ADMIN_PASSWORD`, el usuario `ADMIN_USERNAME` y un secreto aleatorio largo para `ADMIN_JWT_SECRET`. El archivo real está excluido de Git. No sobrescribir un `.env` existente; cambiar la contraseña en ese archivo no modifica una base ya inicializada.
+| Servicio | URL |
+|---|---|
+| Tienda (UI) | http://localhost:8080 |
+| Panel Admin | http://localhost:8081 |
 
-```powershell
-docker compose --env-file app/.env -p tero-manual -f app/docker-compose.yml up -d --build
-```
+PostgreSQL y Redis no publican puertos en el host: solo son accesibles desde la red de Compose.
 
-La tienda queda en <http://localhost:8080> y Admin en <http://localhost:8081>; ambos puertos deben estar libres. PostgreSQL y Redis solo son accesibles desde la red de Compose.
+Para detener conservando datos: `docker compose --env-file app/.env -f app/docker-compose.yml down`. Para detener y borrar la base: agregar `-v`.
 
 ## Pruebas de integración
 
-Las pruebas usan el ejecutor incluido en Node.js 22, sin dependencias adicionales. Verifican la integración por HTTP a través de la UI con servicios, PostgreSQL y Redis reales.
+Dos casos (catálogo/carrito y compra/orden) que corren contra el stack completo por HTTP, sin instalar nada en el host:
 
-| Caso | Comprobaciones |
-| --- | --- |
-| Catálogo y carrito | Consultar un producto, agregarlo, recuperar cantidad y precio, eliminarlo y comprobar que desaparece. |
-| Compra y orden | Preparar y confirmar la compra, recuperar la orden desde Orders con sus artículos y dirección, comprobar importes de Checkout, eliminación de sesión y vaciado del carrito. |
-
-Con `app/.env` preparado, ejecutar desde la raíz:
-
-```powershell
-docker compose --env-file app/.env -p tero-integration -f app/docker-compose.yml -f app/tests/integration/compose.yml up --build --abort-on-container-exit --exit-code-from integration-tests --attach integration-tests integration-tests
-$LASTEXITCODE
+```bash
+docker compose --env-file app/.env -p tero-integration \
+  -f app/docker-compose.yml -f app/tests/integration/compose.yml \
+  up --build --abort-on-container-exit --exit-code-from integration-tests \
+  --attach integration-tests integration-tests
 ```
 
-El resultado esperado es **2 pruebas aprobadas, 0 fallidas y código de salida 0**. No hace falta instalar Node.js en el host. El proyecto `tero-integration` tiene su propia base de datos y no publica puertos.
+Resultado esperado: **2 aprobadas, 0 fallidas, código de salida 0**. Detalle de los casos, limitaciones y resultados en [`app/tests/integration/README.md`](app/tests/integration/README.md).
 
-Las APIs tienen hasta 90 segundos para estar disponibles y cada petición tiene un límite de 10 segundos. Solo se reintentan lecturas de disponibilidad. Cada prueba utiliza un identificador único y limpia su carrito; el cliente de prueba vacía el carrito después de comprar, como hace la UI. La orden ficticia se conserva porque no existe una API de borrado. Un fallo previo a confirmar también puede dejar una sesión de Checkout.
+## Pipeline de CI
 
-Para consultar resultados y retirar los contenedores conservando los datos:
+`.github/workflows/ci.yml` corre en cada pull request y en cada push a `main`:
 
-```powershell
-docker compose --env-file app/.env -p tero-integration -f app/docker-compose.yml -f app/tests/integration/compose.yml logs --no-color integration-tests
-docker compose --env-file app/.env -p tero-integration -f app/docker-compose.yml -f app/tests/integration/compose.yml down
-```
+| Etapa | Herramienta | Qué hace |
+|---|---|---|
+| Secretos | Gitleaks | Escanea todo el historial; falla si encuentra credenciales |
+| SAST | Semgrep | Análisis estático de seguridad (reglas default + OWASP Top 10) |
+| Calidad | SonarCloud | Bugs, code smells, duplicación; quality gate "Sonar way" |
+| SCA | Trivy fs | Vulnerabilidades en dependencias (CRITICAL/HIGH con parche) |
+| Build | Docker | Las 6 imágenes en paralelo, multi-stage, no-root |
+| Escaneo de imagen | Trivy image | Cada imagen antes de publicar |
+| Tests | Node test runner | Las 2 pruebas de integración |
+| Publicación | GHCR | Solo en push a `main`, tag por SHA y `latest` |
 
-Ante un fallo de arranque, consultar también los logs de `catalog`, `carts`, `checkout`, `orders` y `ui`. Estas pruebas no cubren Admin, interfaz visual, rendimiento ni durabilidad ante reinicios. El caso de compra selecciona `priority-mail` y comprueba envío de 10 e impuesto de 5 según el contrato actual.
+Orden: secretos → SAST + calidad + SCA → build + escaneo → tests → publicación. Si una etapa falla, las siguientes no corren.
 
-### Ejecución en CI
+**Estado de los gates de Trivy:** configurados como informativos (`exit-code: 0`) hasta remediar los hallazgos del primer escaneo (133 vulnerabilidades con parche en catalog, orders y checkout). Se vuelven bloqueantes en el PR de remediación.
 
-El workflow `.github/workflows/ci.yml` ejecuta las pruebas en cada PR y cada push a `main`. Genera credenciales efímeras, construye los cinco servicios usados por los casos y ejecuta la suite con el mismo Compose. El job independiente de build sigue construyendo y escaneando las seis imágenes, incluida Admin.
+`.github/workflows/terraform.yml` corre en PRs que toquen `infra/`: `terraform fmt`, `validate` y `tflint`.
 
-El código de salida de las pruebas determina el resultado del job `Pruebas de integración`. La publicación en GHCR requiere que aprueben tanto `build` como `integration`; solo se publica desde `main`. Esta dependencia bloquea la publicación si fallan los tests. Para exigir el resultado antes del merge, agregar el check `Pruebas de integración` a los checks requeridos de la protección de `main`.
+## Infraestructura
 
-El artifact `integration-results` conserva durante 30 días el reporte `integration.tap` y los logs `compose.log`, incluso si fallan los tests. El entorno de CI y su volumen temporal se retiran al finalizar. Las credenciales no se incluyen en el artifact. Descargar la evidencia relevante para la entrega antes de que expire.
+Toda la infraestructura de AWS está en `infra/` como Terraform: VPC con subnets públicas y privadas, security groups, repositorios ECR, estado remoto en S3 y variables por ambiente (`dev`, `test`, `prod`). Detalle en [`infra/README.md`](infra/README.md).
 
-La seguridad aún tiene pendientes: Trivy SCA e imágenes están configurados como informativos (`exit-code: 0`) y excluyen hallazgos sin parche (`ignore-unfixed: true`). Los tests no completan el gate de seguridad ni el análisis de calidad de código.
+Pendiente (requiere cuenta de AWS): ECS, RDS, ElastiCache, Lambda, y el despliegue automatizado desde el pipeline.
 
-### Resultados
+## Flujo de trabajo
 
-El 11 de noviembre de 2026 se ejecutaron los dos casos sobre un entorno Compose local con una base nueva: **2 aprobados, 0 fallidos, código 0**, con una duración del ejecutor de 2,20 segundos, sin contar la construcción y el arranque de los contenedores. Se verificaron los datos del carrito, la recuperación de la orden y la eliminación de la sesión. Un control adicional con destino inaccesible produjo **2 fallos y código 1** mediante el mismo mecanismo `--exit-code-from`, confirmando la propagación del error. El workflow pasó la validación de actionlint; su ejecución en GitHub Actions queda pendiente del PR. Se recomienda conservar el artifact de esa ejecución como evidencia y completar los gates de seguridad y calidad antes de promover ambientes.
+- Rama `main` protegida: todo cambio entra por pull request con al menos una aprobación de otro integrante, conversaciones resueltas y checks en verde.
+- Ramas por tema: `feat/`, `fix/`, `ci/`, `docs/`, `test/`.
+- Un PR, un tema.
 
-## Comprobaciones manuales
+## Evidencias
 
-Con el entorno local iniciado, abrir <http://localhost:8080> en una ventana privada:
-
-1. Agregar un producto y comprobar nombre, cantidad y precio. Recargar y verificar que persiste. Eliminarlo y comprobar que el carrito sigue vacío tras recargar.
-2. Agregar un producto, pulsar **Comprar**, completar datos ficticios con un email identificable y confirmar una sola vez. Anotar el código de orden, localizarlo en **Mis órdenes** y comprobar producto, cantidad y total de artículos. Verificar que el carrito queda vacío y la orden sigue visible al recargar.
-
-**Mis órdenes** lista todas las órdenes y muestra el total de artículos, sin impuestos ni envío: identificar la compra por código y email.
-
-```powershell
-docker compose --env-file app/.env -p tero-manual -f app/docker-compose.yml down
-```
+`docs/evidencias/` contiene capturas y logs organizados por bloque de la letra (`01-planificacion` … `09-documentacion`).
