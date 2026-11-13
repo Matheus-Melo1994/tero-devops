@@ -1,0 +1,44 @@
+# Validación de IaC (semana 2 del plan): corre solo cuando cambia algo en infra/.
+# fmt + validate + tflint no necesitan credenciales de AWS.
+# plan y apply se agregan cuando haya cuenta (con OIDC, sin access keys en el repo).
+
+name: Terraform
+
+on:
+  pull_request:
+    paths: ["infra/**"]
+  push:
+    branches: [main]
+    paths: ["infra/**"]
+
+jobs:
+  validate:
+    name: fmt + validate + tflint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+
+      - name: Formato
+        run: terraform fmt -check -recursive -diff
+
+      - name: Init (sin backend, no necesita AWS)
+        run: terraform init -backend=false
+
+      - name: Validate
+        run: terraform validate
+
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+
+      - name: tflint
+        run: |
+          tflint --init
+          tflint --recursive
