@@ -2675,6 +2675,56 @@
     "sca_coverage": {
       "exit_code": 0,
       "note": "trivy fs app/src detects the six services: admin/package-lock.json, cart/requirements.txt (transitive dependencies pinned), catalog/go.mod, checkout/yarn.lock, orders/go.mod, ui/package-lock.json"
+    },
+    "after_scans": {
+      "trivy": "0.76.2",
+      "database_updated_at": "2026-11-16T18:50:18Z",
+      "recheck": "SCA of the committed tree and the six recorded image IDs rescanned after the last change: exit code 0, 0 HIGH/CRITICAL"
+    },
+    "negative_case": {
+      "scope": "local, Trivy 0.76.2 with the same options as the CI gates (--severity CRITICAL,HIGH --ignore-unfixed=false)",
+      "fixture": "urllib3==1.26.4 appended to cart/requirements.txt in a temporary copy of the tree; never committed",
+      "sca": {
+        "report_exit_code": 0,
+        "gate_exit_code": 1,
+        "target": "cart/requirements.txt",
+        "high": 8,
+        "critical": 0
+      },
+      "image_cart": {
+        "report_exit_code": 0,
+        "gate_exit_code": 1,
+        "target": "Python (python-pkg)",
+        "high": 8,
+        "critical": 0
+      },
+      "findings": [
+        "CVE-2021-33503",
+        "CVE-2023-43804",
+        "CVE-2025-66418",
+        "CVE-2025-66471",
+        "CVE-2026-21441",
+        "CVE-2026-44431",
+        "CVE-2026-97687",
+        "CVE-2026-97689"
+      ],
+      "reports_written_when_gate_fails": [
+        "trivy-sca.json",
+        "trivy-sca.txt",
+        "trivy-image.json",
+        "trivy-image.txt"
+      ]
+    },
+    "workflow": {
+      "actionlint_exit_code": 0,
+      "image_id_preserved_after_docker_save_load": true,
+      "pending_github_actions": [
+        "full pipeline green on the final commit",
+        "SonarCloud quality gate wait with sonarqube-scan-action@v8",
+        "artifact upload when a Trivy gate fails",
+        "publish skipped because a needed job failed on a push to main",
+        "publish of the approved images to GHCR"
+      ]
     }
   }
 }

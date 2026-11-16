@@ -1,7 +1,7 @@
 # Pipeline de CI: corre en cada PR y en cada push a main.
 # Etapas: secretos → SAST + calidad + SCA → build + escaneo de imagen → pruebas de integración → publicar en GHCR.
 # Gates de Trivy bloqueantes (issue #59): CRITICAL/HIGH con o sin parche cortan el pipeline.
-# Publicar exige que pasen secretos, SAST, calidad, SCA, escaneo de imagen y pruebas,
+# Publicar exige que pasen secretos, SAST, quality gate de SonarCloud, SCA, escaneo de imagen y pruebas,
 # y publica la misma imagen que se escaneó (no se reconstruye).
 # Próximas: deploy.
 
@@ -38,7 +38,9 @@ jobs:
       - uses: actions/checkout@v4
       - run: semgrep scan --config p/default --config p/owasp-top-ten --severity ERROR --error app/src
 
-  # 4.2 / 4.3 Calidad de código: SonarCloud con quality gate "Sonar way" (umbrales de bugs, smells, duplicación)
+  # 4.2 / 4.3 Calidad de código: SonarCloud con quality gate "Sonar way" (umbrales de bugs, smells, duplicación).
+  # Gate bloqueante: sonar.qualitygate.wait hace que el scanner espere el resultado del quality gate
+  # (hasta sonar.qualitygate.timeout segundos) y termine con error si no aprueba o si no llega a tiempo.
   quality:
     name: Calidad (SonarCloud)
     runs-on: ubuntu-latest
@@ -47,7 +49,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: SonarSource/sonarqube-scan-action@v5
+      - uses: SonarSource/sonarqube-scan-action@v8
+        with:
+          args: >-
+            -Dsonar.qualitygate.wait=true
+            -Dsonar.qualitygate.timeout=300
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 

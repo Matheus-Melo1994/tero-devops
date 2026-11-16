@@ -89,20 +89,30 @@ Resultado esperado: **2 aprobadas, 0 fallidas, código de salida 0**. Detalle de
 |---|---|---|
 | Secretos | Gitleaks | Escanea todo el historial; falla si encuentra credenciales |
 | SAST | Semgrep | Análisis estático de seguridad (reglas default + OWASP Top 10) |
-| Calidad | SonarCloud | Bugs, code smells, duplicación; quality gate "Sonar way" |
+| Calidad | SonarCloud | Bugs, code smells, duplicación; espera el quality gate "Sonar way" y falla si no aprueba |
 | SCA | Trivy fs | Vulnerabilidades en dependencias; bloquea con cualquier CRITICAL/HIGH, tenga o no parche |
 | Build | Docker | Las 6 imágenes en paralelo, multi-stage, no-root |
 | Escaneo de imagen | Trivy image | Cada imagen antes de publicar; bloquea con cualquier CRITICAL/HIGH |
 | Tests | Node test runner | Las 2 pruebas de integración |
 | Publicación | GHCR | Solo en push a `main` y si pasaron todos los controles; publica la imagen escaneada, tag por SHA y `latest` |
 
-Orden: secretos → SAST + calidad + SCA → build + escaneo → tests → publicación. Si una etapa falla, las siguientes no corren.
+Orden: secretos → SAST + calidad + SCA → build + escaneo → tests → publicación. Si falla la detección de secretos no corre ningún otro job; SCA además requiere SAST; la publicación solo corre si aprobaron todos los controles.
 
 **Gates de Trivy (bloqueantes desde la issue #59).** Los jobs de SCA y de build usan Trivy v0.76.2 con `severity: CRITICAL,HIGH` e `ignore-unfixed: false`. Cada uno corre dos pasos: un reporte JSON completo (`exit-code: '0'`, solo evidencia) y el gate (`exit-code: '1'`), que corta el job con el código de salida de Trivy. No hay `continue-on-error` ni excepciones (`.trivyignore`). Los reportes se suben como artifacts aunque el gate falle (`trivy-sca` y `trivy-image-<servicio>`, 30 días).
+
+**Quality gate de SonarCloud (bloqueante).** El job `quality` pasa al scanner `sonar.qualitygate.wait=true` y `sonar.qualitygate.timeout=300`: en lugar de terminar al enviar el análisis, espera el resultado del quality gate y falla si no aprueba. Usa `SonarSource/sonarqube-scan-action@v8`; la versión anterior (`@v5`) ya no tiene soporte y avisa en cada ejecución de una vulnerabilidad conocida.
 
 **Publicación sin reconstruir.** `publish` depende de `gitleaks`, `sast`, `quality`, `sca`, `build` e `integration`: si cualquiera falla, no corre. No vuelve a construir: descarga el `image.tar` que el job de build exportó después de aprobar el gate, comprueba que su ID coincide con el registrado al escanear (`image-id.txt`) y publica esa misma imagen.
 
 `.github/workflows/terraform.yml` corre en PRs que toquen `infra/`: `terraform fmt`, `validate` y `tflint`.
+
+**Verificación de los gates.** Comprobado en local con la misma versión y las mismas opciones de Trivy que usa el pipeline (detalle en `validation.negative_case` del JSON de evidencia):
+
+- Caso aprobado: `trivy fs app/src` y las seis imágenes terminan con código 0.
+- Caso negativo: con una dependencia vulnerable agregada solo en una copia temporal (`urllib3==1.26.4` en Cart, 8 HIGH), el gate de SCA y el de la imagen terminan con código 1, y los reportes JSON y de tabla quedan escritos aunque el gate falle. El fixture nunca entró al repositorio.
+- El workflow pasa `actionlint` y el ID de una imagen se conserva tras `docker save` / `docker load`.
+
+Pendiente de la primera ejecución en GitHub Actions, porque no se puede reproducir de forma fiable en local: el pipeline completo en verde, el quality gate de SonarCloud con la acción `@v8`, la subida de artifacts cuando falla un gate y que `publish` se omita por un `needs` fallido en un push a `main`.
 
 ## Remediación de vulnerabilidades (issue #59)
 
