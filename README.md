@@ -90,15 +90,17 @@ Resultado esperado: **2 aprobadas, 0 fallidas, código de salida 0**. Detalle de
 | Secretos | Gitleaks | Escanea todo el historial; falla si encuentra credenciales |
 | SAST | Semgrep | Análisis estático de seguridad (reglas default + OWASP Top 10) |
 | Calidad | SonarCloud | Bugs, code smells, duplicación; quality gate "Sonar way" |
-| SCA | Trivy fs | Vulnerabilidades en dependencias (CRITICAL/HIGH con parche) |
+| SCA | Trivy fs | Vulnerabilidades en dependencias; bloquea con cualquier CRITICAL/HIGH, tenga o no parche |
 | Build | Docker | Las 6 imágenes en paralelo, multi-stage, no-root |
-| Escaneo de imagen | Trivy image | Cada imagen antes de publicar |
+| Escaneo de imagen | Trivy image | Cada imagen antes de publicar; bloquea con cualquier CRITICAL/HIGH |
 | Tests | Node test runner | Las 2 pruebas de integración |
-| Publicación | GHCR | Solo en push a `main`, tag por SHA y `latest` |
+| Publicación | GHCR | Solo en push a `main` y si pasaron todos los controles; publica la imagen escaneada, tag por SHA y `latest` |
 
 Orden: secretos → SAST + calidad + SCA → build + escaneo → tests → publicación. Si una etapa falla, las siguientes no corren.
 
-**Estado de los gates de Trivy:** configurados como informativos (`exit-code: 0`) hasta remediar los hallazgos del primer escaneo (133 vulnerabilidades con parche en catalog, orders y checkout). Se vuelven bloqueantes en el PR de remediación.
+**Gates de Trivy (bloqueantes desde la issue #59).** Los jobs de SCA y de build usan Trivy v0.76.2 con `severity: CRITICAL,HIGH` e `ignore-unfixed: false`. Cada uno corre dos pasos: un reporte JSON completo (`exit-code: '0'`, solo evidencia) y el gate (`exit-code: '1'`), que corta el job con el código de salida de Trivy. No hay `continue-on-error` ni excepciones (`.trivyignore`). Los reportes se suben como artifacts aunque el gate falle (`trivy-sca` y `trivy-image-<servicio>`, 30 días).
+
+**Publicación sin reconstruir.** `publish` depende de `gitleaks`, `sast`, `quality`, `sca`, `build` e `integration`: si cualquiera falla, no corre. No vuelve a construir: descarga el `image.tar` que el job de build exportó después de aprobar el gate, comprueba que su ID coincide con el registrado al escanear (`image-id.txt`) y publica esa misma imagen.
 
 `.github/workflows/terraform.yml` corre en PRs que toquen `infra/`: `terraform fmt`, `validate` y `tflint`.
 
