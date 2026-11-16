@@ -102,6 +102,28 @@ Orden: secretos → SAST + calidad + SCA → build + escaneo → tests → publi
 
 `.github/workflows/terraform.yml` corre en PRs que toquen `infra/`: `terraform fmt`, `validate` y `tflint`.
 
+## Remediación de vulnerabilidades (issue #59)
+
+Escaneos con Trivy 0.76.2, severidades HIGH y CRITICAL, incluyendo las que no tienen parche (`ignore-unfixed: false`). El detalle por hallazgo, los IDs de imagen y las validaciones están en [`docs/evidencias/05-seguridad/remediacion-trivy.json`](docs/evidencias/05-seguridad/remediacion-trivy.json).
+
+| Servicio | Imagen antes (HIGH / CRITICAL) | Imagen después | Qué se hizo |
+|---|---|---|---|
+| catalog | 51 / 3 | 0 / 0 | Go 1.27.4, `alpine:3.24`, pgx 5.9.0, grpc 1.83.2, otel 1.44.0, `golang.org/x/*` |
+| orders | 45 / 2 | 0 / 0 | Go 1.27.4, `alpine:3.24`, pgx 5.9.0, `golang.org/x/*` |
+| checkout | 55 / 1 | 0 / 0 | Dependencias actualizadas en `yarn.lock`; solo dependencias de producción en la imagen |
+| ui | 10 / 0 | 0 / 0 | `package-lock.json` + `npm ci`; npm y yarn fuera del runtime |
+| admin | 10 / 0 | 0 / 0 | `package-lock.json` + `npm ci`; npm y yarn fuera del runtime |
+| cart | 52 / 0 | 0 / 0 | Base `python:3.12-alpine`, fastapi 0.163.1 (starlette 1.10.0), dependencias transitivas fijadas |
+
+El SCA (`trivy fs app/src`) pasó de 69 HIGH y 6 CRITICAL a 0. Además ahora cubre los seis servicios: antes UI y Admin no tenían lockfile y Cart solo declaraba sus dependencias directas, así que esa ausencia de hallazgos no era un resultado limpio.
+
+Decisiones:
+
+- **Base de Cart.** `python:3.12-slim` (Debian 13) traía 49 HIGH en paquetes del sistema, 47 de ellos sin parche publicado (util-linux, ncurses, sqlite, systemd, perl). Se reemplazó por `python:3.12-alpine`, manteniendo multi-stage, usuario no-root y las mismas variables. La base alpine publicada tenía 16 HIGH en `krb5-libs` con parche disponible en el repositorio de Alpine; el `apk upgrade` de la etapa final los corrige. Todas las dependencias tienen wheel para musl, por lo que no se compila nada en la imagen.
+- **Dependencias de Cart.** starlette 0.38.6 llegaba como transitiva de fastapi 0.115.0. Se subió fastapi a 0.163.1 y prometheus-fastapi-instrumentator a 8.1.0 (la rama compatible con starlette 1.x). `requirements.in` lista las dependencias directas y `requirements.txt` se genera con `pip-compile` fijando también las transitivas; la imagen instala exactamente esa lista (`pip install --no-deps`), que es la que analiza el SCA.
+- **npm fuera del runtime (UI y Admin).** Los 10 HIGH de cada imagen venían de las dependencias del propio npm incluido en `node:22-alpine` (brace-expansion, pacote, sigstore, ip-address, picomatch), no de la aplicación. En ejecución solo se usa `node dist/app.js`, así que la etapa final elimina npm, npx y yarn. La etapa de build los conserva y usa `npm ci` con el lockfile.
+- **Admin.** Las pruebas de integración no cubren Admin, por lo que se verificó aparte contra el stack de Compose: acceso sin sesión rechazado (401), login incorrecto (401), login correcto con cookie de sesión, alta de un producto visible desde Catalog, edición, baja y listado de órdenes. 11 comprobaciones aprobadas.
+
 ## Infraestructura
 
 Toda la infraestructura de AWS está en `infra/` como Terraform: VPC con subnets públicas y privadas, security groups, repositorios ECR, estado remoto en S3 y variables por ambiente (`dev`, `test`, `prod`). Detalle en [`infra/README.md`](infra/README.md).

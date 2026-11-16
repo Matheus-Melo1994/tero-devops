@@ -101,10 +101,10 @@ docker compose logs -f <servicio>
 | Servicio     | Lenguaje       | Framework        | Runtime         | Persistencia      | Puerto externo |
 |--------------|----------------|------------------|-----------------|-------------------|----------------|
 | **ui**       | TypeScript     | Express          | Node.js 22      | —                 | 8080           |
-| **catalog**  | Go 1.24        | Gin + GORM       | Alpine Linux    | PostgreSQL        | —              |
-| **cart**     | Python 3.12    | FastAPI          | Python slim     | PostgreSQL        | —              |
+| **catalog**  | Go 1.27        | Gin + GORM       | Alpine Linux    | PostgreSQL        | —              |
+| **cart**     | Python 3.12    | FastAPI          | Python alpine   | PostgreSQL        | —              |
 | **checkout** | TypeScript     | NestJS           | Node.js 22      | Redis             | —              |
-| **orders**   | Go 1.24        | Gin + GORM       | Alpine Linux    | PostgreSQL        | —              |
+| **orders**   | Go 1.27        | Gin + GORM       | Alpine Linux    | PostgreSQL        | —              |
 | **admin**    | TypeScript     | Express          | Node.js 22      | PostgreSQL        | 8081           |
 | **db**       | —              | PostgreSQL 16    | —               | —                 | —              |
 | **redis**    | —              | Redis 7          | Alpine Linux    | —                 | —              |
