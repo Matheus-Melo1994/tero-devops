@@ -27,7 +27,7 @@ tero-devops/
 |---|---|
 | Levantar la app local | Docker Desktop (Compose v2.24+) |
 | Trabajar en la infraestructura | Terraform >= 1.6, AWS CLI |
-| Desarrollar un servicio | Go 1.24 (catalog, orders) · Node 22 (ui, admin, checkout) · Python 3.12 (carts) |
+| Desarrollar un servicio | Go 1.27 (catalog, orders) · Node 22 (ui, admin, checkout) · Python 3.12 (carts) |
 
 No hace falta instalar Go, Node ni Python para levantar la app: todo corre en contenedores.
 

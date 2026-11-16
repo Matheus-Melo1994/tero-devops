@@ -2323,6 +2323,28 @@
     }
   },
   "after": {
+    "image-catalog": {
+      "id": "sha256:d5c1a00e8a4a3cc17f1197fd3426f85f494de90c5fe12be1c23c8e220341c9c5",
+      "artifact": "tero-remediated/catalog:local",
+      "targets": [
+        {
+          "target": "tero-remediated/catalog:local (alpine 3.24.4)",
+          "type": "alpine",
+          "packages": 17,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        },
+        {
+          "target": "app/catalog",
+          "type": "gobinary",
+          "packages": 58,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        }
+      ]
+    },
     "image-checkout": {
       "id": "sha256:4459220935d1e29c9b5503338ebb13e6dedb6bcaa524bf4477f55239771c7b5d",
       "artifact": "tero-remediated/checkout:local",
@@ -2345,6 +2367,42 @@
         }
       ]
     },
+    "image-orders": {
+      "id": "sha256:014f25fb2450bbc71c380df75d425aacfe455df3c3e12738d0744afcd8e9b86f",
+      "artifact": "tero-remediated/orders:local",
+      "targets": [
+        {
+          "target": "tero-remediated/orders:local (alpine 3.24.4)",
+          "type": "alpine",
+          "packages": 17,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        },
+        {
+          "target": "app/orders",
+          "type": "gobinary",
+          "packages": 38,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        }
+      ]
+    },
+    "sca-catalog": {
+      "id": null,
+      "artifact": "app/src/catalog",
+      "targets": [
+        {
+          "target": "go.mod",
+          "type": "gomod",
+          "packages": 67,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        }
+      ]
+    },
     "sca-checkout": {
       "id": null,
       "artifact": "app/src/checkout",
@@ -2353,6 +2411,20 @@
           "target": "yarn.lock",
           "type": "yarn",
           "packages": 144,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        }
+      ]
+    },
+    "sca-orders": {
+      "id": null,
+      "artifact": "app/src/orders",
+      "targets": [
+        {
+          "target": "go.mod",
+          "type": "gomod",
+          "packages": 50,
           "high": 0,
           "critical": 0,
           "findings": []
@@ -2371,6 +2443,26 @@
       "sca_exit_code": 0,
       "image_exit_code": 0,
       "build": "passed; yarn install --immutable; production dependencies only"
+    },
+    "catalog": {
+      "integration": {
+        "container_exit_code": 0,
+        "passed": 2,
+        "failed": 0
+      },
+      "sca_exit_code": 0,
+      "image_exit_code": 0,
+      "build": "passed; golang:1.27.4-alpine + alpine:3.24; go mod tidy without changes, go mod verify, go build, go vet; no test files"
+    },
+    "orders": {
+      "integration": {
+        "container_exit_code": 0,
+        "passed": 2,
+        "failed": 0
+      },
+      "sca_exit_code": 0,
+      "image_exit_code": 0,
+      "build": "passed; golang:1.27.4-alpine + alpine:3.24; go mod tidy without changes, go mod verify, go build, go vet; no test files"
     }
   }
 }
