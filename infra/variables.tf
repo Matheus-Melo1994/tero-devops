@@ -135,3 +135,10 @@ variable "secret_recovery_window_days" {
   type        = number
   default     = 7
 }
+
+# ---------- Observabilidad ----------
+variable "alarm_email" {
+  description = "Correo que recibe las alarmas (hay que confirmar la suscripción desde el correo). null = sin suscripción."
+  type        = string
+  default     = null
+}

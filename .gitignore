@@ -23,6 +23,8 @@ __pycache__/
 *.tfstate.*
 *.tfvars
 !*.example.tfvars
+# Paquete de la Lambda que arma Terraform en cada plan
+infra/modules/observability/build/
 # Los tfvars por ambiente sí se versionan: no llevan secretos (se generan en Secrets Manager).
 !infra/environments/*.tfvars
 

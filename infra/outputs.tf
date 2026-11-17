@@ -58,3 +58,23 @@ output "secret_arns" {
     admin_jwt_secret = module.data.admin_jwt_secret_arn
   }
 }
+
+output "dashboard_name" {
+  description = "Dashboard operativo del ambiente en CloudWatch."
+  value       = module.observability.dashboard_name
+}
+
+output "alarm_names" {
+  description = "Alarmas del ambiente; avisan al tópico alarm_topic_arn."
+  value       = module.observability.alarm_names
+}
+
+output "alarm_topic_arn" {
+  description = "Tópico SNS de las alarmas (suscribir un correo con alarm_email)."
+  value       = module.observability.alarm_topic_arn
+}
+
+output "synthetic_function_name" {
+  description = "Lambda del chequeo sintético. Prueba manual: aws lambda invoke --function-name <nombre> out.json."
+  value       = module.observability.synthetic_function_name
+}

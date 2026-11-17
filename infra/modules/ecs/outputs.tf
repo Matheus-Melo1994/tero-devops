@@ -18,6 +18,16 @@ output "log_group_names" {
   value       = { for k, g in aws_cloudwatch_log_group.this : k => g.name }
 }
 
+output "alb_arn_suffix" {
+  description = "Sufijo del ARN del ALB, dimensión LoadBalancer de sus métricas en CloudWatch."
+  value       = aws_lb.this.arn_suffix
+}
+
+output "target_group_arn_suffixes" {
+  description = "Sufijo del ARN de cada target group público, dimensión TargetGroup de sus métricas."
+  value       = { for k, tg in aws_lb_target_group.public : k => tg.arn_suffix }
+}
+
 output "namespace" {
   description = "Namespace privado de descubrimiento (ej: dev.tero.local)."
   value       = aws_service_discovery_private_dns_namespace.this.name

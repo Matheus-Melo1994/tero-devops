@@ -1,3 +1,13 @@
+output "db_instance_identifier" {
+  description = "Identificador de la instancia RDS (dimensión DBInstanceIdentifier de sus métricas)."
+  value       = aws_db_instance.this.identifier
+}
+
+output "redis_cache_cluster_id" {
+  description = "Nodo de ElastiCache (dimensión CacheClusterId de sus métricas)."
+  value       = sort(aws_elasticache_replication_group.this.member_clusters)[0]
+}
+
 output "db_host" {
   description = "Host de PostgreSQL (endpoint de RDS, sin puerto)."
   value       = aws_db_instance.this.address

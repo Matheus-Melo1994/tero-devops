@@ -192,3 +192,22 @@ module "ecs" {
     secrets = { PGPASSWORD = module.data.db_password_secret_arn }
   }
 }
+
+# Dashboard, alarmas y chequeo sintético serverless del ambiente (bloque 8).
+module "observability" {
+  source = "./modules/observability"
+
+  name_prefix               = local.name_prefix
+  environment               = var.environment
+  aws_region                = var.aws_region
+  alb_url                   = "${var.certificate_arn == null ? "http" : "https"}://${module.ecs.alb_dns_name}"
+  alb_arn_suffix            = module.ecs.alb_arn_suffix
+  target_group_arn_suffixes = module.ecs.target_group_arn_suffixes
+  cluster_name              = module.ecs.cluster_name
+  service_names             = module.ecs.service_names
+  log_group_names           = module.ecs.log_group_names
+  db_instance_identifier    = module.data.db_instance_identifier
+  redis_cache_cluster_id    = module.data.redis_cache_cluster_id
+  iam_role_arn              = local.existing_iam_role_arn
+  alarm_email               = var.alarm_email
+}
