@@ -11,6 +11,10 @@ availability_zones = ["us-east-1a", "us-east-1b"]
 # El estado de Dev administra los repositorios ECR que comparten los tres ambientes: se aplica primero.
 manage_shared_resources = true
 
+# AWS Academy (Learner Lab) no permite crear roles IAM: ECS y la Lambda usan LabRole.
+# En una cuenta sin esa restricción, null: Terraform crea roles propios con permisos mínimos.
+existing_iam_role_name = "LabRole"
+
 # Imágenes: SHA de main cuyo pipeline de CI publicó las seis imágenes (tero-<servicio>:<sha>).
 # Antes del primer apply hay que copiarlas a ECR (ver README). El pipeline de deploy lo reemplaza
 # con -var="image_tag=<sha>" puesto después de -var-file.

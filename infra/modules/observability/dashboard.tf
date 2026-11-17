@@ -51,19 +51,19 @@ locals {
     {
       type = "metric", x = 8, y = 9, width = 8, height = 6
       properties = {
-        title  = "ALB: tiempo de respuesta p95 (s)"
+        title  = "Tiempo de respuesta p95 por servicio (s)"
         region = var.aws_region, view = "timeSeries", stat = "p95", period = 60
-        metrics = [for k, tg in var.target_group_arn_suffixes :
-        ["AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", var.alb_arn_suffix, "TargetGroup", tg, { label = k }]]
+        metrics = [for k, tg in var.target_groups :
+        ["AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", tg.load_balancer, "TargetGroup", tg.target_group, { label = k }]]
       }
     },
     {
       type = "metric", x = 16, y = 9, width = 8, height = 6
       properties = {
-        title  = "ALB: tareas sanas por servicio público"
+        title  = "Tareas sanas en el ALB por servicio"
         region = var.aws_region, view = "timeSeries", stat = "Minimum", period = 60
-        metrics = [for k, tg in var.target_group_arn_suffixes :
-        ["AWS/ApplicationELB", "HealthyHostCount", "LoadBalancer", var.alb_arn_suffix, "TargetGroup", tg, { label = k }]]
+        metrics = [for k, tg in var.target_groups :
+        ["AWS/ApplicationELB", "HealthyHostCount", "LoadBalancer", tg.load_balancer, "TargetGroup", tg.target_group, { label = k }]]
       }
     },
     {

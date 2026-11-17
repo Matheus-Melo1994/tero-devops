@@ -173,13 +173,13 @@ resource "aws_cloudwatch_metric_alarm" "alb_5xx" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "unhealthy_targets" {
-  for_each = var.target_group_arn_suffixes
+  for_each = var.target_groups
 
   alarm_name          = "${var.name_prefix}-${each.key}-no-healthy-targets"
-  alarm_description   = "El ALB no tiene ninguna tarea sana de ${each.key} desde hace 3 minutos. Ver infra/README.md, Alarmas."
+  alarm_description   = "Ningun ALB tiene una tarea sana de ${each.key} desde hace 3 minutos. Ver infra/README.md, Alarmas."
   namespace           = "AWS/ApplicationELB"
   metric_name         = "HealthyHostCount"
-  dimensions          = { LoadBalancer = var.alb_arn_suffix, TargetGroup = each.value }
+  dimensions          = { LoadBalancer = each.value.load_balancer, TargetGroup = each.value.target_group }
   statistic           = "Minimum"
   period              = 60
   evaluation_periods  = 3

@@ -72,21 +72,20 @@ module "data" {
 }
 
 locals {
-  ns = "${var.environment}.tero.local"
-
   db_endpoint = "${module.data.db_host}:${module.data.db_port}"
 
-  # Endpoints internos: cada servicio encuentra a los otros por Cloud Map, igual que en compose.
+  # Llamadas entre servicios: por el ALB interno, enrutado por path ({internal_url} lo completa el módulo
+  # ECS). Cada servicio privado declara las rutas que atiende, que son los prefijos de su API.
   # Las claves coinciden con var.services y con las imágenes que publica el pipeline (tero-<clave>).
   # Las contraseñas no van en environment: entran por secrets desde Secrets Manager, siempre.
   services_config = {
     ui = {
       cpu = 256, memory = 512, desired = var.desired_count, public = true, path = "/"
       environment = {
-        RETAIL_UI_ENDPOINTS_CATALOG  = "http://catalog.${local.ns}:8080"
-        RETAIL_UI_ENDPOINTS_CARTS    = "http://carts.${local.ns}:8080"
-        RETAIL_UI_ENDPOINTS_CHECKOUT = "http://checkout.${local.ns}:8080"
-        RETAIL_UI_ENDPOINTS_ORDERS   = "http://orders.${local.ns}:8080"
+        RETAIL_UI_ENDPOINTS_CATALOG  = "{internal_url}"
+        RETAIL_UI_ENDPOINTS_CARTS    = "{internal_url}"
+        RETAIL_UI_ENDPOINTS_CHECKOUT = "{internal_url}"
+        RETAIL_UI_ENDPOINTS_ORDERS   = "{internal_url}"
         PORT                         = "8080"
       }
     }
@@ -109,7 +108,8 @@ locals {
       }
     }
     catalog = {
-      cpu = 256, memory = 512, desired = var.desired_count, public = false, db_init = true
+      cpu            = 256, memory = 512, desired = var.desired_count, public = false, db_init = true
+      internal_paths = ["/catalog", "/catalog/*"]
       environment = {
         GIN_MODE                            = "release"
         RETAIL_CATALOG_PERSISTENCE_PROVIDER = "postgres"
@@ -119,10 +119,11 @@ locals {
       }
       secrets = { RETAIL_CATALOG_PERSISTENCE_PASSWORD = module.data.db_password_secret_arn }
     }
-    # El servicio se llama carts (como en compose y en la URL que usa ui), pero su imagen es tero-cart.
+    # El servicio se llama carts (como en compose y en su ruta /carts), pero su imagen es tero-cart.
     # Espera a db-init: cart no crea cartdb ni su tabla.
     carts = {
-      image = "cart", cpu = 256, memory = 512, desired = var.desired_count, public = false, db_init = true
+      image          = "cart", cpu = 256, memory = 512, desired = var.desired_count, public = false, db_init = true
+      internal_paths = ["/carts", "/carts/*"]
       environment = {
         CART_PERSISTENCE_PROVIDER = "postgres"
         CART_POSTGRES_HOST        = module.data.db_host
@@ -134,7 +135,8 @@ locals {
       secrets = { CART_POSTGRES_PASSWORD = module.data.db_password_secret_arn }
     }
     orders = {
-      cpu = 256, memory = 512, desired = var.desired_count, public = false, db_init = true
+      cpu            = 256, memory = 512, desired = var.desired_count, public = false, db_init = true
+      internal_paths = ["/orders", "/orders/*"]
       environment = {
         GIN_MODE                           = "release"
         RETAIL_ORDERS_PERSISTENCE_ENDPOINT = local.db_endpoint
@@ -144,11 +146,12 @@ locals {
       secrets = { RETAIL_ORDERS_PERSISTENCE_PASSWORD = module.data.db_password_secret_arn }
     }
     checkout = {
-      cpu = 256, memory = 512, desired = var.desired_count, public = false
+      cpu            = 256, memory = 512, desired = var.desired_count, public = false
+      internal_paths = ["/checkout", "/checkout/*"]
       environment = {
         RETAIL_CHECKOUT_PERSISTENCE_PROVIDER  = "redis"
         RETAIL_CHECKOUT_PERSISTENCE_REDIS_URL = module.data.redis_url
-        RETAIL_CHECKOUT_ENDPOINTS_ORDERS      = "http://orders.${local.ns}:8080"
+        RETAIL_CHECKOUT_ENDPOINTS_ORDERS      = "{internal_url}"
       }
     }
   }
@@ -165,18 +168,18 @@ locals {
 module "ecs" {
   source = "./modules/ecs"
 
-  name_prefix                = local.name_prefix
-  environment                = var.environment
-  aws_region                 = var.aws_region
-  vpc_id                     = module.network.vpc_id
-  public_subnet_ids          = module.network.public_subnet_ids
-  private_subnet_ids         = module.network.private_subnet_ids
-  alb_security_group_id      = module.network.alb_security_group_id
-  services_security_group_id = module.network.services_security_group_id
-  image_tag                  = var.image_tag
-  services                   = local.service_definitions
-  iam_role_arn               = local.existing_iam_role_arn
-  certificate_arn            = var.certificate_arn
+  name_prefix                    = local.name_prefix
+  aws_region                     = var.aws_region
+  vpc_id                         = module.network.vpc_id
+  public_subnet_ids              = module.network.public_subnet_ids
+  private_subnet_ids             = module.network.private_subnet_ids
+  alb_security_group_id          = module.network.alb_security_group_id
+  internal_alb_security_group_id = module.network.internal_alb_security_group_id
+  services_security_group_id     = module.network.services_security_group_id
+  image_tag                      = var.image_tag
+  services                       = local.service_definitions
+  iam_role_arn                   = local.existing_iam_role_arn
+  certificate_arn                = var.certificate_arn
 
   # Crea catalogdb, cartdb y cart_items antes de que arranquen los servicios que usan Postgres.
   db_init = {
@@ -197,17 +200,17 @@ module "ecs" {
 module "observability" {
   source = "./modules/observability"
 
-  name_prefix               = local.name_prefix
-  environment               = var.environment
-  aws_region                = var.aws_region
-  alb_url                   = "${var.certificate_arn == null ? "http" : "https"}://${module.ecs.alb_dns_name}"
-  alb_arn_suffix            = module.ecs.alb_arn_suffix
-  target_group_arn_suffixes = module.ecs.target_group_arn_suffixes
-  cluster_name              = module.ecs.cluster_name
-  service_names             = module.ecs.service_names
-  log_group_names           = module.ecs.log_group_names
-  db_instance_identifier    = module.data.db_instance_identifier
-  redis_cache_cluster_id    = module.data.redis_cache_cluster_id
-  iam_role_arn              = local.existing_iam_role_arn
-  alarm_email               = var.alarm_email
+  name_prefix            = local.name_prefix
+  environment            = var.environment
+  aws_region             = var.aws_region
+  alb_url                = "${var.certificate_arn == null ? "http" : "https"}://${module.ecs.alb_dns_name}"
+  alb_arn_suffix         = module.ecs.alb_arn_suffix
+  target_groups          = module.ecs.target_groups
+  cluster_name           = module.ecs.cluster_name
+  service_names          = module.ecs.service_names
+  log_group_names        = module.ecs.log_group_names
+  db_instance_identifier = module.data.db_instance_identifier
+  redis_cache_cluster_id = module.data.redis_cache_cluster_id
+  iam_role_arn           = local.existing_iam_role_arn
+  alarm_email            = var.alarm_email
 }

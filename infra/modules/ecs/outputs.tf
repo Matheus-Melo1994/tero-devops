@@ -23,12 +23,15 @@ output "alb_arn_suffix" {
   value       = aws_lb.this.arn_suffix
 }
 
-output "target_group_arn_suffixes" {
-  description = "Sufijo del ARN de cada target group público, dimensión TargetGroup de sus métricas."
-  value       = { for k, tg in aws_lb_target_group.public : k => tg.arn_suffix }
+output "target_groups" {
+  description = "Dimensiones LoadBalancer y TargetGroup de las métricas de cada servicio detrás de un ALB (público o interno)."
+  value = merge(
+    { for k, tg in aws_lb_target_group.public : k => { load_balancer = aws_lb.this.arn_suffix, target_group = tg.arn_suffix } },
+    { for k, tg in aws_lb_target_group.internal : k => { load_balancer = aws_lb.internal.arn_suffix, target_group = tg.arn_suffix } },
+  )
 }
 
-output "namespace" {
-  description = "Namespace privado de descubrimiento (ej: dev.tero.local)."
-  value       = aws_service_discovery_private_dns_namespace.this.name
+output "internal_url" {
+  description = "URL del ALB interno por el que se llaman los servicios."
+  value       = local.internal_url
 }

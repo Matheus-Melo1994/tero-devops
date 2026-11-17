@@ -123,6 +123,31 @@ resource "aws_security_group" "alb" {
   tags = { Name = "${var.name_prefix}-sg-alb" }
 }
 
+# ALB interno: los servicios se llaman entre sí a través de él (catalog, carts, checkout, orders).
+# Solo se alcanza desde dentro de la VPC; vive en las subnets privadas.
+resource "aws_security_group" "internal_alb" {
+  name        = "${var.name_prefix}-internal-alb"
+  description = "ALB interno: HTTP solo desde la VPC."
+  vpc_id      = aws_vpc.this.id
+
+  ingress {
+    description = "HTTP desde la VPC"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [var.vpc_cidr]
+  }
+
+  tags = { Name = "${var.name_prefix}-sg-internal-alb" }
+}
+
 resource "aws_security_group" "services" {
   name        = "${var.name_prefix}-services"
   description = "Servicios ECS: solo trafico desde el ALB y entre servicios."
@@ -134,6 +159,14 @@ resource "aws_security_group" "services" {
     to_port         = 8080
     protocol        = "tcp"
     security_groups = [aws_security_group.alb.id]
+  }
+
+  ingress {
+    description     = "Desde el ALB interno"
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.internal_alb.id]
   }
 
   ingress {

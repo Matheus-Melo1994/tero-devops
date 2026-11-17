@@ -23,9 +23,12 @@ variable "alb_arn_suffix" {
   type        = string
 }
 
-variable "target_group_arn_suffixes" {
-  description = "Dimensión TargetGroup de cada target group público, por servicio."
-  type        = map(string)
+variable "target_groups" {
+  description = "Por servicio, dimensiones LoadBalancer y TargetGroup de su target group (ALB público o interno)."
+  type = map(object({
+    load_balancer = string
+    target_group  = string
+  }))
 }
 
 variable "cluster_name" {

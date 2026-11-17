@@ -11,6 +11,10 @@ availability_zones = ["us-east-1a", "us-east-1b"]
 # Lee los repositorios ECR que administra Dev; despliega la misma imagen que pasó por Dev.
 manage_shared_resources = false
 
+# AWS Academy (Learner Lab) no permite crear roles IAM: ECS y la Lambda usan LabRole.
+# En una cuenta sin esa restricción, null: Terraform crea roles propios con permisos mínimos.
+existing_iam_role_name = "LabRole"
+
 # El pipeline lo reemplaza con -var="image_tag=<sha>" puesto después de -var-file.
 image_tag     = "dd0abffb390b04109f2a73313c0f666a30dcb357"
 desired_count = 1

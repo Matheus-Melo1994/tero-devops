@@ -3,11 +3,6 @@ variable "name_prefix" {
   type        = string
 }
 
-variable "environment" {
-  description = "Ambiente (dev, test, prod)."
-  type        = string
-}
-
 variable "aws_region" {
   description = "Región, usada por el driver awslogs."
   type        = string
@@ -33,6 +28,11 @@ variable "alb_security_group_id" {
   type        = string
 }
 
+variable "internal_alb_security_group_id" {
+  description = "Security group del ALB interno (del módulo network)."
+  type        = string
+}
+
 variable "services_security_group_id" {
   description = "Security group de los servicios (del módulo network)."
   type        = string
@@ -45,23 +45,25 @@ variable "image_tag" {
 
 variable "services" {
   description = <<-EOT
-    Definición de cada microservicio. La clave es el nombre del servicio en ECS y en Cloud Map.
+    Definición de cada microservicio. La clave es el nombre del servicio en ECS.
     image = URL del repositorio de la imagen, sin tag (el tag es image_tag); path y extra_paths = rutas
-    del ALB que recibe un servicio público; environment = variables en claro; secrets = nombre de
-    variable → ARN del secreto en Secrets Manager; db_init = true si el servicio usa Postgres y debe
-    esperar al contenedor db-init.
+    del ALB público que recibe un servicio público; internal_paths = rutas del ALB interno que recibe un
+    servicio privado (hasta 5); environment = variables en claro, donde {internal_url} se reemplaza por
+    la URL del ALB interno; secrets = nombre de variable → ARN del secreto en Secrets Manager;
+    db_init = true si el servicio usa Postgres y debe esperar al contenedor db-init.
   EOT
   type = map(object({
-    image       = string
-    cpu         = number
-    memory      = number
-    desired     = number
-    public      = bool
-    path        = optional(string, "/")
-    extra_paths = optional(list(string), [])
-    environment = optional(map(string), {})
-    secrets     = optional(map(string), {})
-    db_init     = optional(bool, false)
+    image          = string
+    cpu            = number
+    memory         = number
+    desired        = number
+    public         = bool
+    path           = optional(string, "/")
+    extra_paths    = optional(list(string), [])
+    internal_paths = optional(list(string), [])
+    environment    = optional(map(string), {})
+    secrets        = optional(map(string), {})
+    db_init        = optional(bool, false)
   }))
 
   validation {

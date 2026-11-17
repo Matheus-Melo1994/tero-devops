@@ -1,8 +1,24 @@
 # Orquestación (punto 3.3): cluster ECS Fargate, ALB público para ui y admin, un servicio por microservicio
-# en subnets privadas, descubrimiento por nombre (Cloud Map) y logs JSON a CloudWatch (punto 8.2).
+# en subnets privadas, un ALB interno para las llamadas entre servicios y logs JSON a CloudWatch (punto 8.2).
+#
+# Descubrimiento: los servicios se llaman a través del ALB interno, enrutado por path (/catalog, /carts,
+# /checkout, /orders). No se usa Cloud Map porque AWS Academy (Learner Lab) niega servicediscovery:*;
+# el ALB interno además reparte la carga y saca de rotación las tareas que no pasan el health check.
 
 locals {
-  public_services = { for k, s in var.services : k => s if s.public }
+  public_services   = { for k, s in var.services : k => s if s.public }
+  internal_services = { for k, s in var.services : k => s if !s.public && length(s.internal_paths) > 0 }
+
+  # En environment, {internal_url} se reemplaza por la URL del ALB interno (se conoce recién al crearlo).
+  internal_url = "http://${aws_lb.internal.dns_name}"
+  environment = {
+    for k, s in var.services : k => { for name, value in s.environment : name => replace(value, "{internal_url}", local.internal_url) }
+  }
+
+  target_group_arns = merge(
+    { for k, tg in aws_lb_target_group.public : k => tg.arn },
+    { for k, tg in aws_lb_target_group.internal : k => tg.arn },
+  )
 
   # Con un rol existente (LabRole en AWS Academy) el módulo no crea roles ni políticas.
   create_roles       = var.iam_role_arn == null
@@ -22,28 +38,65 @@ resource "aws_ecs_cluster" "this" {
   }
 }
 
-# ---------- Descubrimiento de servicios: catalog.tero.local, orders.tero.local, etc. ----------
-resource "aws_service_discovery_private_dns_namespace" "this" {
-  name        = "${var.environment}.tero.local"
-  description = "Nombres internos de los microservicios de Tero (${var.environment})"
-  vpc         = var.vpc_id
+# ---------- ALB interno: llamadas entre servicios ----------
+resource "aws_lb" "internal" {
+  name               = "${var.name_prefix}-internal"
+  internal           = true
+  load_balancer_type = "application"
+  security_groups    = [var.internal_alb_security_group_id]
+  subnets            = var.private_subnet_ids
 }
 
-resource "aws_service_discovery_service" "this" {
-  for_each = var.services
+resource "aws_lb_target_group" "internal" {
+  for_each = local.internal_services
 
-  name = each.key
+  name        = "${var.name_prefix}-${each.key}"
+  port        = 8080
+  protocol    = "HTTP"
+  target_type = "ip"
+  vpc_id      = var.vpc_id
 
-  dns_config {
-    namespace_id = aws_service_discovery_private_dns_namespace.this.id
-    dns_records {
-      ttl  = 10
-      type = "A"
-    }
+  health_check {
+    path                = "/health"
+    matcher             = "200"
+    interval            = 30
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
   }
 
-  health_check_custom_config {
-    failure_threshold = 1
+  deregistration_delay = 15
+}
+
+resource "aws_lb_listener" "internal" {
+  load_balancer_arn = aws_lb.internal.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Ruta interna desconocida"
+      status_code  = "404"
+    }
+  }
+}
+
+resource "aws_lb_listener_rule" "internal" {
+  for_each = local.internal_services
+
+  listener_arn = aws_lb_listener.internal.arn
+  priority     = 10 + index(sort(keys(local.internal_services)), each.key)
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.internal[each.key].arn
+  }
+
+  condition {
+    path_pattern {
+      values = each.value.internal_paths
+    }
   }
 }
 
@@ -242,7 +295,7 @@ resource "aws_ecs_task_definition" "this" {
 
       portMappings = [{ containerPort = 8080, protocol = "tcp" }]
 
-      environment = [for k, v in each.value.environment : { name = k, value = v }]
+      environment = [for k, v in local.environment[each.key] : { name = k, value = v }]
       secrets     = [for k, arn in each.value.secrets : { name = k, valueFrom = arn }]
 
       dependsOn = each.value.db_init ? [{ containerName = "db-init", condition = "SUCCESS" }] : []
@@ -285,14 +338,11 @@ resource "aws_ecs_service" "this" {
     assign_public_ip = false
   }
 
-  service_registries {
-    registry_arn = aws_service_discovery_service.this[each.key].arn
-  }
-
+  # ui y admin en el ALB público; catalog, carts, checkout y orders en el ALB interno.
   dynamic "load_balancer" {
-    for_each = each.value.public ? [1] : []
+    for_each = contains(keys(local.target_group_arns), each.key) ? [local.target_group_arns[each.key]] : []
     content {
-      target_group_arn = aws_lb_target_group.public[each.key].arn
+      target_group_arn = load_balancer.value
       container_name   = each.key
       container_port   = 8080
     }
@@ -304,10 +354,10 @@ resource "aws_ecs_service" "this" {
     rollback = true
   }
 
-  # Los servicios públicos tardan en registrarse en el ALB; sin gracia, ECS los reemplazaría antes del primer health check.
-  health_check_grace_period_seconds = each.value.public ? 60 : null
+  # Las tareas tardan en registrarse en su ALB; sin gracia, ECS las reemplazaría antes del primer health check.
+  health_check_grace_period_seconds = contains(keys(local.target_group_arns), each.key) ? 60 : null
 
   # El despliegue es este mismo recurso: el pipeline aplica Terraform con image_tag = SHA aprobado, se crea
   # una revisión nueva de la task definition y el servicio pasa a usarla. No hay un segundo camino que la cambie.
-  depends_on = [aws_lb_listener.http, aws_lb_listener.https]
+  depends_on = [aws_lb_listener.http, aws_lb_listener.https, aws_lb_listener_rule.by_path, aws_lb_listener_rule.internal]
 }
