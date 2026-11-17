@@ -37,3 +37,53 @@ variable "services" {
   type        = list(string)
   default     = ["catalog", "orders", "ui", "admin", "checkout", "cart"]
 }
+
+# ---------- Agregar al final de infra/variables.tf ----------
+
+variable "image_registry" {
+  description = "Registry de donde ECS baja las imágenes. GHCR mientras no se use ECR."
+  type        = string
+  default     = "ghcr.io/matheus-melo1994"
+}
+
+variable "image_tag" {
+  description = "Tag a desplegar; el pipeline pasa el SHA del commit."
+  type        = string
+  default     = "latest"
+}
+
+variable "desired_count" {
+  description = "Réplicas por servicio."
+  type        = number
+  default     = 1
+}
+
+variable "db_host" {
+  description = "Host de PostgreSQL. Lo provee el módulo data; hasta entonces, placeholder."
+  type        = string
+  default     = "db.placeholder"
+}
+
+variable "redis_host" {
+  description = "Host de Redis. Lo provee el módulo data; hasta entonces, placeholder."
+  type        = string
+  default     = "redis.placeholder"
+}
+
+variable "db_password_arn" {
+  description = "ARN del secreto de la contraseña de Postgres en Secrets Manager. Vacío hasta el módulo data."
+  type        = string
+  default     = ""
+}
+
+variable "admin_password_arn" {
+  description = "ARN del secreto ADMIN_PASSWORD. Vacío hasta el módulo data."
+  type        = string
+  default     = ""
+}
+
+variable "admin_jwt_secret_arn" {
+  description = "ARN del secreto ADMIN_JWT_SECRET. Vacío hasta el módulo data."
+  type        = string
+  default     = ""
+}
