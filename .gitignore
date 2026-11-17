@@ -21,6 +21,8 @@ __pycache__/
 .terraform/
 *.tfstate
 *.tfstate.*
+# Los planes guardados pueden llevar valores sensibles del estado
+*.tfplan
 *.tfvars
 !*.example.tfvars
 # Paquete de la Lambda que arma Terraform en cada plan
