@@ -168,7 +168,7 @@ resource "aws_ecs_task_definition" "this" {
 
   container_definitions = jsonencode([{
     name      = each.key
-    image     = "${var.image_registry}/tero-${each.key}:${var.image_tag}"
+    image     = "${var.image_registry}/tero-${coalesce(each.value.image, each.key)}:${var.image_tag}"
     essential = true
 
     portMappings = [{ containerPort = 8080, protocol = "tcp" }]

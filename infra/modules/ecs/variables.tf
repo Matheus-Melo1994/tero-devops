@@ -59,6 +59,7 @@ variable "services" {
     memory      = number
     desired     = number
     public      = bool
+    image       = optional(string)
     path        = optional(string, "/")
     environment = optional(map(string), {})
     secrets     = optional(map(string), {})

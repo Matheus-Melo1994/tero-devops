@@ -64,7 +64,8 @@ locals {
       secrets = var.db_password_arn == "" ? {} : { RETAIL_CATALOG_PERSISTENCE_PASSWORD = var.db_password_arn }
     }
     carts = {
-      cpu = 256, memory = 512, desired = var.desired_count, public = false
+
+      image = "cart", cpu = 256, memory = 512, desired = var.desired_count, public = false
       environment = {
         CART_PERSISTENCE_PROVIDER = "postgres"
         CART_POSTGRES_HOST        = var.db_host
