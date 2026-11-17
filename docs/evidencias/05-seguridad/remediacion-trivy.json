@@ -2346,7 +2346,7 @@
       ]
     },
     "image-cart": {
-      "id": "sha256:7d24c3957388cf4546e36b1bdee99dcf1c1b84de5acec90371a62a1f33f9013a",
+      "id": "sha256:e1490010a90f3cee5af62a523417e35c1a7c93aecac6d082dd1e9cee8c0b9e7c",
       "artifact": "tero-remediated/cart:local",
       "targets": [
         {
@@ -2665,12 +2665,20 @@
       "integration": {
         "container_exit_code": 0,
         "passed": 2,
-        "failed": 0
+        "failed": 0,
+        "runs_after_hash_pinning": "3 runs: the first failed 0/2 in the readiness hook (UI proxy returned 504 for /api/catalog/products for 90 s; catalog logs were not captured, cause not determined); the next two passed 2/2 with the same images"
       },
       "sca_exit_code": 0,
       "image_exit_code": 0,
-      "build": "passed; python:3.12-alpine multi-stage, non-root (uid 1000); apk upgrade applies krb5-libs 1.22.3-r0; pip install --no-deps --only-binary from requirements.txt compiled with pip-compile (23 pinned packages = 23 installed); fastapi 0.163.1, starlette 1.10.0, prometheus-fastapi-instrumentator 8.1.0",
-      "base_image_decision": "python:3.12-slim (debian 13.7) carried 47 HIGH findings without a fix; python:3.12-alpine had 16 HIGH in krb5-libs, all fixed by apk upgrade"
+      "build": "passed (no cache); python:3.12-alpine multi-stage, non-root (uid 1000); apk upgrade applies krb5-libs 1.22.3-r0 and zlib 1.4-r0; pip install --require-hashes --no-deps --only-binary from requirements.txt compiled with pip-compile --generate-hashes (23 pinned packages with hashes = 23 installed); fastapi 0.163.1, starlette 1.10.0, prometheus-fastapi-instrumentator 8.1.0",
+      "base_image_decision": "python:3.12-slim (debian 13.7) carried 47 HIGH findings without a fix; python:3.12-alpine had 16 HIGH in krb5-libs, all fixed by apk upgrade",
+      "hash_pinning": {
+        "reason": "SonarCloud quality gate failed on PR #62 (docker:S8544, app/src/cart/Dockerfile: Python dependencies installed without verified hashes; new_security_rating 3, threshold 1)",
+        "pip_compile": "7.7.0, --generate-hashes; same 23 versions as before, 609 sha256 hashes",
+        "tamper_check": "one hash altered in a temporary copy: pip install --require-hashes exits 1 (THESE PACKAGES DO NOT MATCH THE HASHES FROM THE REQUIREMENTS FILE); the altered file never entered the repository",
+        "sca_packages_detected": 23,
+        "sonarcloud_recheck": "pending: needs a new analysis on GitHub Actions"
+      }
     },
     "sca_coverage": {
       "exit_code": 0,
@@ -2679,7 +2687,8 @@
     "after_scans": {
       "trivy": "0.76.2",
       "database_updated_at": "2026-11-16T18:50:18Z",
-      "recheck": "SCA of the committed tree and the six recorded image IDs rescanned after the last change: exit code 0, 0 HIGH/CRITICAL"
+      "recheck": "SCA of the committed tree and the six recorded image IDs rescanned after the last change: exit code 0, 0 HIGH/CRITICAL",
+      "recheck_after_hash_pinning": "trivy fs app/src (six targets) and the rebuilt cart image: exit code 0, 0 HIGH/CRITICAL (report created 2026-11-17T00:21Z, same database); the other five images were not rebuilt or rescanned because their sources did not change"
     },
     "negative_case": {
       "scope": "local, Trivy 0.76.2 with the same options as the CI gates (--severity CRITICAL,HIGH --ignore-unfixed=false)",
@@ -2719,12 +2728,33 @@
       "actionlint_exit_code": 0,
       "image_id_preserved_after_docker_save_load": true,
       "pending_github_actions": [
-        "full pipeline green on the final commit",
-        "SonarCloud quality gate wait with sonarqube-scan-action@v8",
+        "full pipeline green on the final commit (including the SonarCloud quality gate after the Cart hash pinning)",
         "artifact upload when a Trivy gate fails",
         "publish skipped because a needed job failed on a push to main",
         "publish of the approved images to GHCR"
-      ]
+      ],
+      "github_actions_pr_62": {
+        "run_id": 43986134260,
+        "event": "pull_request",
+        "commit": "86576c47c9250603646e7daeafdb0fb184b7fdd7",
+        "conclusion": "failure",
+        "jobs": {
+          "gitleaks": "success",
+          "sast": "success",
+          "sca": "success",
+          "build": "success (6/6: admin, cart, catalog, checkout, orders, ui)",
+          "integration": "success",
+          "quality": "failure",
+          "publish": "skipped (pull_request event, by design)"
+        },
+        "quality_gate": "sonarqube-scan-action@v8 ran SonarScanner CLI 8.4.0 with sonar.qualitygate.wait=true; QUALITY GATE STATUS: FAILED, scanner exit code 3; only failing condition new_security_rating (1 new vulnerability, docker:S8544 in app/src/cart/Dockerfile)",
+        "artifacts": [
+          "trivy-sca",
+          "trivy-image-<service> (6)",
+          "image-<service> (6)",
+          "integration-results"
+        ]
+      }
     }
   }
 }

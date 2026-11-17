@@ -1,9 +1,10 @@
 # Dependencias directas de Cart. requirements.txt se genera a partir de este
-# archivo y fija también las transitivas, para que el SCA (Trivy) analice
-# exactamente lo que se instala en la imagen. Para regenerarlo:
+# archivo y fija también las transitivas con el hash de cada paquete, para que
+# el SCA (Trivy) analice exactamente lo que se instala en la imagen y pip
+# rechace cualquier archivo distinto del fijado (--require-hashes). Para regenerarlo:
 #
 #   docker run --rm -v "$PWD:/src" -w /src python:3.12-alpine sh -c \
-#     "pip install -q pip-tools && pip-compile --strip-extras --pip-args='--only-binary=:all:' requirements.in"
+#     "pip install -q pip-tools && pip-compile --strip-extras --generate-hashes --pip-args='--only-binary=:all:' requirements.in"
 #
 # fastapi >= 0.163 admite starlette 1.x (corrige CVE-2024-47874, CVE-2026-48818
 # y CVE-2026-54283); prometheus-fastapi-instrumentator 8.x es la rama compatible

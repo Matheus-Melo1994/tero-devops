@@ -6,10 +6,11 @@
 FROM python:3.12-alpine AS builder
 WORKDIR /src
 COPY requirements.txt .
-# requirements.txt fija directas y transitivas (se genera desde requirements.in):
+# requirements.txt fija directas y transitivas con su hash (se genera desde requirements.in):
+# --require-hashes rechaza cualquier paquete cuyo archivo no coincida con el hash fijado,
 # --no-deps instala exactamente esa lista y --only-binary evita compilar en la imagen.
 # Se instala en una carpeta aparte para copiarla limpia a la etapa 2.
-RUN pip install --no-cache-dir --no-deps --only-binary=:all: --prefix=/install -r requirements.txt
+RUN pip install --no-cache-dir --require-hashes --no-deps --only-binary=:all: --prefix=/install -r requirements.txt
 
 # ---- Etapa 2: runtime (imagen final) ----
 FROM python:3.12-alpine
