@@ -71,11 +71,15 @@ resource "aws_iam_role_policy_attachment" "execution_base" {
 }
 
 locals {
-  secret_arns = distinct(flatten([for s in var.services : values(s.secrets)]))
+  db_init_secrets = var.db_init == null ? {} : var.db_init.secrets
+  secret_arns     = distinct(concat(flatten([for s in var.services : values(s.secrets)]), values(local.db_init_secrets)))
+
+  # Se decide por los nombres de las variables (conocidos al planificar), no por los ARN (recién se conocen al aplicar).
+  has_secrets = length(local.db_init_secrets) > 0 || anytrue([for s in var.services : length(s.secrets) > 0])
 }
 
 resource "aws_iam_role_policy" "execution_secrets" {
-  count = length(local.secret_arns) > 0 ? 1 : 0
+  count = local.has_secrets ? 1 : 0
 
   name = "${var.name_prefix}-ecs-read-secrets"
   role = aws_iam_role.execution.id
@@ -149,12 +153,29 @@ resource "aws_lb_listener_rule" "by_path" {
 
   condition {
     path_pattern {
-      values = [each.value.path, "${each.value.path}/*"]
+      values = concat([each.value.path, "${each.value.path}/*"], each.value.extra_paths)
     }
   }
 }
 
 # ---------- Task definitions ----------
+locals {
+  # Contenedor previo de los servicios que usan Postgres: corre el script idempotente y termina.
+  # El servicio solo arranca si salió bien (dependsOn SUCCESS), así nunca encuentra su base sin crear.
+  db_init_container = var.db_init == null ? null : {
+    name      = "db-init"
+    image     = var.db_init.image
+    essential = false
+    command   = ["sh", "-c", "printf '%s' \"$INIT_SQL\" | psql --no-psqlrc -v ON_ERROR_STOP=1"]
+
+    environment = concat(
+      [for k, v in var.db_init.environment : { name = k, value = v }],
+      [{ name = "INIT_SQL", value = var.db_init.sql }]
+    )
+    secrets = [for k, arn in var.db_init.secrets : { name = k, valueFrom = arn }]
+  }
+}
+
 resource "aws_ecs_task_definition" "this" {
   for_each = var.services
 
@@ -166,28 +187,49 @@ resource "aws_ecs_task_definition" "this" {
   execution_role_arn       = aws_iam_role.execution.arn
   task_role_arn            = aws_iam_role.task.arn
 
-  container_definitions = jsonencode([{
-    name      = each.key
-    image     = "${var.image_registry}/tero-${coalesce(each.value.image, each.key)}:${var.image_tag}"
-    essential = true
-
-    portMappings = [{ containerPort = 8080, protocol = "tcp" }]
-
-    environment = [for k, v in each.value.environment : { name = k, value = v }]
-    secrets     = [for k, arn in each.value.secrets : { name = k, valueFrom = arn }]
-
-    logConfiguration = {
-      logDriver = "awslogs"
-      options = {
-        awslogs-group         = aws_cloudwatch_log_group.this[each.key].name
-        awslogs-region        = var.aws_region
-        awslogs-stream-prefix = each.key
+  container_definitions = jsonencode(concat(
+    each.value.db_init ? [merge(local.db_init_container, {
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.this[each.key].name
+          awslogs-region        = var.aws_region
+          awslogs-stream-prefix = "db-init"
+        }
       }
-    }
+    })] : [],
+    [{
+      name      = each.key
+      image     = "${each.value.image}:${var.image_tag}"
+      essential = true
 
-    # No-root ya viene del Dockerfile; readonly filesystem como defensa extra.
-    readonlyRootFilesystem = false
-  }])
+      portMappings = [{ containerPort = 8080, protocol = "tcp" }]
+
+      environment = [for k, v in each.value.environment : { name = k, value = v }]
+      secrets     = [for k, arn in each.value.secrets : { name = k, valueFrom = arn }]
+
+      dependsOn = each.value.db_init ? [{ containerName = "db-init", condition = "SUCCESS" }] : []
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.this[each.key].name
+          awslogs-region        = var.aws_region
+          awslogs-stream-prefix = each.key
+        }
+      }
+
+      # No-root ya viene del Dockerfile; readonly filesystem como defensa extra.
+      readonlyRootFilesystem = false
+    }]
+  ))
+
+  lifecycle {
+    precondition {
+      condition     = !each.value.db_init || var.db_init != null
+      error_message = "El servicio ${each.key} pide db_init pero el módulo no recibió la variable db_init."
+    }
+  }
 }
 
 # ---------- Servicios ----------

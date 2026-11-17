@@ -23,6 +23,8 @@ __pycache__/
 *.tfstate.*
 *.tfvars
 !*.example.tfvars
+# Los tfvars por ambiente sí se versionan: no llevan secretos (se generan en Secrets Manager).
+!infra/environments/*.tfvars
 
 
 # OS / editor

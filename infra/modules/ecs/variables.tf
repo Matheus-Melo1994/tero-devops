@@ -38,32 +38,52 @@ variable "services_security_group_id" {
   type        = string
 }
 
-variable "image_registry" {
-  description = "Prefijo del registry de imágenes, ej: ghcr.io/matheus-melo1994 o <cuenta>.dkr.ecr.us-east-1.amazonaws.com."
-  type        = string
-}
-
 variable "image_tag" {
-  description = "Tag de las imágenes a desplegar (SHA del commit o latest)."
+  description = "Tag de las imágenes a desplegar: el SHA del commit que publicó el pipeline."
   type        = string
-  default     = "latest"
 }
 
 variable "services" {
   description = <<-EOT
-    Definición de cada microservicio. environment = variables en claro; secrets = nombre de variable → ARN del secreto
-    en Secrets Manager (vacío hasta que exista el módulo data).
+    Definición de cada microservicio. La clave es el nombre del servicio en ECS y en Cloud Map.
+    image = URL del repositorio de la imagen, sin tag (el tag es image_tag); path y extra_paths = rutas
+    del ALB que recibe un servicio público; environment = variables en claro; secrets = nombre de
+    variable → ARN del secreto en Secrets Manager; db_init = true si el servicio usa Postgres y debe
+    esperar al contenedor db-init.
   EOT
   type = map(object({
+    image       = string
     cpu         = number
     memory      = number
     desired     = number
     public      = bool
-    image       = optional(string)
     path        = optional(string, "/")
+    extra_paths = optional(list(string), [])
     environment = optional(map(string), {})
     secrets     = optional(map(string), {})
+    db_init     = optional(bool, false)
   }))
+
+  validation {
+    condition = alltrue(flatten([
+      for s in var.services : [for arn in values(s.secrets) : startswith(arn, "arn:aws:secretsmanager:")]
+    ]))
+    error_message = "Cada secreto debe ser el ARN de un secreto de Secrets Manager: no se admiten valores vacíos ni en claro."
+  }
+}
+
+variable "db_init" {
+  description = <<-EOT
+    Inicialización de las bases: imagen con psql, script SQL idempotente, variables PG* de conexión y
+    el secreto PGPASSWORD. null si ningún servicio usa Postgres.
+  EOT
+  type = object({
+    image       = string
+    sql         = string
+    environment = map(string)
+    secrets     = map(string)
+  })
+  default = null
 }
 
 variable "log_retention_days" {
