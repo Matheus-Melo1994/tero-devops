@@ -51,7 +51,7 @@ func requestLogger() gin.HandlerFunc {
 func recoveryLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
-			if recovered := recover(); recovered != nil {
+			if recover() != nil {
 				slog.Error("Unhandled request error", "error_type", "panic")
 				c.AbortWithStatus(http.StatusInternalServerError)
 			}

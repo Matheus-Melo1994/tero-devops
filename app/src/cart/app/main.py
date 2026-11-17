@@ -19,7 +19,7 @@ async def request_log(request, call_next):
     try:
         response = await call_next(request)
     except Exception as error:
-        logger.error("Unhandled request error", extra={"error_type": type(error).__name__})
+        logger.exception("Unhandled request error", extra={"error_type": type(error).__name__})
         raise
     route = getattr(request.scope.get("route"), "path", "unmatched")
     fields = {

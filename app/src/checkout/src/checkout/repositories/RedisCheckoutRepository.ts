@@ -76,7 +76,8 @@ export class RedisCheckoutRepository
       const client = await this.client();
       await client.ping();
       return true;
-    } catch (error) {
+    } catch {
+      // Solo informa disponibilidad; el detalle del error de Redis no se expone
       this.logger.error('Redis health check failed');
       return false;
     }
