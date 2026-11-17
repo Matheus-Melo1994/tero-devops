@@ -2,8 +2,7 @@
 # en subnets privadas, descubrimiento por nombre (Cloud Map) y logs JSON a CloudWatch (punto 8.2).
 
 locals {
-  public_services  = { for k, s in var.services : k => s if s.public }
-  private_services = { for k, s in var.services : k => s if !s.public }
+  public_services = { for k, s in var.services : k => s if s.public }
 }
 
 # ---------- Cluster ----------
@@ -150,7 +149,7 @@ resource "aws_lb_listener_rule" "by_path" {
 
   condition {
     path_pattern {
-      values = ["${each.value.path}", "${each.value.path}/*"]
+      values = [each.value.path, "${each.value.path}/*"]
     }
   }
 }
