@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
@@ -13,6 +13,7 @@ import (
 	ginprometheus "github.com/zsais/go-gin-prometheus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	gormlogger "gorm.io/gorm/logger"
 )
 
 type ShippingAddress struct {
@@ -58,26 +59,30 @@ type CreateOrderRequest struct {
 var db *gorm.DB
 
 func main() {
+	configureLogging()
 	dsn := buildDSN()
 
 	var err error
 	for i := 0; i < 6; i++ {
-		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{Logger: gormlogger.Default.LogMode(gormlogger.Silent)})
 		if err == nil {
 			break
 		}
-		fmt.Printf("Waiting for PostgreSQL... (%v)\n", err)
+		slog.Warn("Waiting for PostgreSQL", "attempt", i+1)
 		time.Sleep(5 * time.Second)
 	}
 	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
+		slog.Error("Failed to connect to database", "error_type", fmt.Sprintf("%T", err))
+		os.Exit(1)
 	}
 
 	if err := db.AutoMigrate(&Order{}, &OrderItem{}); err != nil {
-		log.Fatal("Failed to migrate schema:", err)
+		slog.Error("Failed to migrate schema", "error_type", fmt.Sprintf("%T", err))
+		os.Exit(1)
 	}
 
-	r := gin.Default()
+	r := gin.New()
+	r.Use(requestLogger(), recoveryLogger())
 
 	p := ginprometheus.NewPrometheus("gin")
 	p.Use(r)
@@ -90,8 +95,10 @@ func main() {
 	r.POST("/orders", createOrder)
 
 	port := getEnv("PORT", "8080")
+	slog.Info("Orders listening", "port", port)
 	if err := r.Run(":" + port); err != nil {
-		log.Fatal(err)
+		slog.Error("HTTP server failed", "error_type", fmt.Sprintf("%T", err))
+		os.Exit(1)
 	}
 }
 
@@ -122,6 +129,7 @@ func createOrder(c *gin.Context) {
 	order.Items = req.Items
 
 	if err := db.Create(&order).Error; err != nil {
+		slog.Error("Order persistence failed", "error_type", fmt.Sprintf("%T", err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

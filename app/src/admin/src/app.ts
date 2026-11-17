@@ -4,10 +4,17 @@ import jwt from 'jsonwebtoken';
 import { Pool } from 'pg';
 import crypto from 'crypto';
 import path from 'path';
+import { accessLog, log } from './logger';
 
 const app = express();
+app.use(accessLog);
 app.use(express.json());
 app.use(cookieParser());
+
+const asyncHandler = (handler: (req: Request, res: Response) => Promise<void>) =>
+  (req: Request, res: Response, next: NextFunction): void => {
+    handler(req, res).catch(next);
+  };
 
 const JWT_SECRET   = process.env.ADMIN_JWT_SECRET   || 'change-me-in-production';
 const ADMIN_USER   = process.env.ADMIN_USERNAME      || 'admin';
@@ -76,7 +83,7 @@ app.get('/auth/me', requireAuth, (_req: Request, res: Response): void => {
 
 // ── Products CRUD ──────────────────────────────────────────────────────────
 
-app.get('/admin/api/products', requireAuth, async (_req: Request, res: Response): Promise<void> => {
+app.get('/admin/api/products', requireAuth, asyncHandler(async (_req: Request, res: Response): Promise<void> => {
   const { rows } = await catalogDb.query(`
     SELECT p.id, p.name, p.description, p.price,
            COALESCE(array_agg(pt.tag_name) FILTER (WHERE pt.tag_name IS NOT NULL), '{}') AS tags
@@ -86,9 +93,9 @@ app.get('/admin/api/products', requireAuth, async (_req: Request, res: Response)
     ORDER BY p.name
   `);
   res.json(rows);
-});
+}));
 
-app.post('/admin/api/products', requireAuth, async (req: Request, res: Response): Promise<void> => {
+app.post('/admin/api/products', requireAuth, asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { name, description, price } = req.body as { name?: string; description?: string; price?: number };
   if (!name || price === undefined) { res.status(400).json({ error: 'name and price are required' }); return; }
   const id = crypto.randomUUID().replace(/-/g, '').slice(0, 26).toUpperCase();
@@ -97,9 +104,9 @@ app.post('/admin/api/products', requireAuth, async (req: Request, res: Response)
     [id, name.trim(), (description || '').trim(), price],
   );
   res.status(201).json({ id, name, description, price });
-});
+}));
 
-app.put('/admin/api/products/:id', requireAuth, async (req: Request, res: Response): Promise<void> => {
+app.put('/admin/api/products/:id', requireAuth, asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { name, description, price } = req.body as { name?: string; description?: string; price?: number };
   if (!name || price === undefined) { res.status(400).json({ error: 'name and price are required' }); return; }
   const { rowCount } = await catalogDb.query(
@@ -108,17 +115,17 @@ app.put('/admin/api/products/:id', requireAuth, async (req: Request, res: Respon
   );
   if (!rowCount) { res.status(404).json({ error: 'Product not found' }); return; }
   res.json({ ok: true });
-});
+}));
 
-app.delete('/admin/api/products/:id', requireAuth, async (req: Request, res: Response): Promise<void> => {
+app.delete('/admin/api/products/:id', requireAuth, asyncHandler(async (req: Request, res: Response): Promise<void> => {
   await catalogDb.query('DELETE FROM product_tags WHERE product_id = $1', [req.params.id]);
   await catalogDb.query('DELETE FROM products WHERE id = $1', [req.params.id]);
   res.json({ ok: true });
-});
+}));
 
 // ── Orders (read-only) ─────────────────────────────────────────────────────
 
-app.get('/admin/api/orders', requireAuth, async (_req: Request, res: Response): Promise<void> => {
+app.get('/admin/api/orders', requireAuth, asyncHandler(async (_req: Request, res: Response): Promise<void> => {
   const { rows } = await ordersDb.query(`
     SELECT o.id, o.created_at, o.first_name, o.last_name, o.email,
            o.address1, o.city, o.state, o.zip_code,
@@ -139,7 +146,7 @@ app.get('/admin/api/orders', requireAuth, async (_req: Request, res: Response): 
     ORDER BY o.created_at DESC
   `);
   res.json(rows);
-});
+}));
 
 // ── Static + health ────────────────────────────────────────────────────────
 
@@ -150,5 +157,10 @@ app.get('*', (_req: Request, res: Response): void => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
+app.use((error: unknown, _req: Request, res: Response, _next: NextFunction): void => {
+  log('error', 'Unhandled request error', { error_type: error instanceof Error ? error.name : 'unknown' });
+  res.status(500).json({ error: 'Internal Server Error' });
+});
+
 const port = parseInt(process.env.PORT || '8080');
-app.listen(port, () => console.log(`Admin listening on :${port}`));
+app.listen(port, () => log('info', 'Admin listening', { port }));

@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -40,6 +40,7 @@ import (
 // @BasePath /
 
 func main() {
+	configureLogging()
 	ctx := context.Background()
 
 	_, otelPresent := os.LookupEnv("OTEL_SERVICE_NAME")
@@ -47,36 +48,39 @@ func main() {
 	if otelPresent {
 		_, err := initTracer(ctx)
 		if err != nil {
-			log.Fatal(err)
+			slog.Error("Tracing initialization failed", "error_type", fmt.Sprintf("%T", err))
+			os.Exit(1)
 		}
 	}
 
 	var config config.AppConfiguration
 	if err := envconfig.Process(ctx, &config); err != nil {
-		log.Fatal(err)
+		slog.Error("Configuration failed", "error_type", fmt.Sprintf("%T", err))
+		os.Exit(1)
 	}
 
 	db, err := repository.NewRepository(config.Database)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("Repository initialization failed", "error_type", fmt.Sprintf("%T", err))
+		os.Exit(1)
 	}
 
 	api, err := api.NewCatalogAPI(db)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("Catalog API initialization failed", "error_type", fmt.Sprintf("%T", err))
+		os.Exit(1)
 	}
 
 	r := gin.New()
-	r.Use(gin.LoggerWithConfig(gin.LoggerConfig{
-		SkipPaths: []string{"/health"},
-	}))
+	r.Use(requestLogger(), recoveryLogger())
 
 	p := ginprometheus.NewPrometheus("gin")
 	p.Use(r)
 
 	c, err := controller.NewController(api)
 	if err != nil {
-		log.Fatalln("Error creating controller", err)
+		slog.Error("Controller initialization failed", "error_type", fmt.Sprintf("%T", err))
+		os.Exit(1)
 	}
 
 	chaosController := middleware.NewChaosController()
@@ -120,12 +124,14 @@ func main() {
 		Addr:    ":" + strconv.Itoa(config.Port),
 		Handler: r,
 	}
+	slog.Info("Catalog listening", "port", config.Port)
 
 	// Initializing the server in a goroutine so that
 	// it won't block the graceful shutdown handling below
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+			slog.Error("HTTP server failed", "error_type", fmt.Sprintf("%T", err))
+			os.Exit(1)
 		}
 	}()
 
@@ -137,17 +143,18 @@ func main() {
 	// kill -9 is syscall.SIGKILL but can't be catch, so don't need add it
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	log.Println("Shutting down server...")
+	slog.Info("Shutting down server")
 
 	// The context is used to inform the server it has 5 seconds to finish
 	// the request it is currently handling
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatal("Server forced to shutdown:", err)
+		slog.Error("Server shutdown failed", "error_type", fmt.Sprintf("%T", err))
+		os.Exit(1)
 	}
 
-	log.Println("Server exiting")
+	slog.Info("Server exiting")
 }
 
 func initTracer(ctx context.Context) (*sdktrace.TracerProvider, error) {

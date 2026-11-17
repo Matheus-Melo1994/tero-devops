@@ -3,15 +3,17 @@ package repository
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strings"
 	"time"
 
-	"retail-store/catalog/config"
-	"retail-store/catalog/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	gormlogger "gorm.io/gorm/logger"
 	"gorm.io/plugin/opentelemetry/tracing"
+	"retail-store/catalog/config"
+	"retail-store/catalog/model"
 )
 
 type Database struct {
@@ -39,11 +41,11 @@ func createPostgreSQLDatabase(config config.DatabaseConfiguration) (*gorm.DB, er
 	var err error
 
 	for i := 0; i < 6; i++ {
-		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{Logger: gormlogger.Default.LogMode(gormlogger.Silent)})
 		if err == nil {
 			return db, nil
 		}
-		fmt.Printf("Waiting for PostgreSQL to be ready... (%v)\n", err)
+		slog.Warn("Waiting for PostgreSQL", "attempt", i+1)
 		time.Sleep(5 * time.Second)
 	}
 
@@ -56,11 +58,11 @@ func NewRepository(config config.DatabaseConfiguration) (CatalogRepository, erro
 
 	switch config.Type {
 	case "postgres":
-		fmt.Printf("Using postgres database %s\n", config.Endpoint)
+		slog.Info("Using postgres database")
 		db, err = createPostgreSQLDatabase(config)
 	default:
-		fmt.Println("Using in-memory database")
-		db, err = gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
+		slog.Info("Using in-memory database")
+		db, err = gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{Logger: gormlogger.Default.LogMode(gormlogger.Silent)})
 	}
 
 	if err != nil {
@@ -68,25 +70,29 @@ func NewRepository(config config.DatabaseConfiguration) (CatalogRepository, erro
 	}
 
 	if err := db.Use(tracing.NewPlugin(tracing.WithoutMetrics())); err != nil {
-		panic(err)
+		slog.Error("Database tracing setup failed", "error_type", fmt.Sprintf("%T", err))
+		return nil, err
 	}
 
-	fmt.Println("Running database migration...")
+	slog.Info("Running database migration")
 
 	// Migrate the schema
-	db.AutoMigrate(&model.Product{})
+	if err := db.AutoMigrate(&model.Product{}); err != nil {
+		slog.Error("Database migration failed", "error_type", fmt.Sprintf("%T", err))
+		return nil, err
+	}
 
-	fmt.Println("Database migration complete")
+	slog.Info("Database migration complete")
 
 	products, err := LoadProductData()
 	if err != nil {
-		fmt.Printf("Error: %v\n", err)
+		slog.Error("Loading product data failed", "error_type", fmt.Sprintf("%T", err))
 		return nil, err
 	}
 
 	tags, err := LoadProductTagData()
 	if err != nil {
-		fmt.Printf("Error: %v\n", err)
+		slog.Error("Loading tag data failed", "error_type", fmt.Sprintf("%T", err))
 		return nil, err
 	}
 
@@ -94,7 +100,10 @@ func NewRepository(config config.DatabaseConfiguration) (CatalogRepository, erro
 
 	for _, tag := range tags {
 		tagEntity := model.Tag{Name: tag.Name, DisplayName: tag.DisplayName}
-		db.Save(tagEntity)
+		if err := db.Save(tagEntity).Error; err != nil {
+			slog.Error("Saving catalog tag failed", "error_type", fmt.Sprintf("%T", err))
+			return nil, err
+		}
 
 		tagMap[tag.Name] = tagEntity
 	}
@@ -115,13 +124,16 @@ func NewRepository(config config.DatabaseConfiguration) (CatalogRepository, erro
 			productTags = append(productTags, tagMap[tag])
 		}
 
-		db.Create(&model.Product{
+		if err := db.Create(&model.Product{
 			ID:          product.ID,
 			Name:        product.Name,
 			Description: product.Description,
 			Price:       product.Price,
 			Tags:        productTags,
-		})
+		}).Error; err != nil {
+			slog.Error("Saving catalog product failed", "error_type", fmt.Sprintf("%T", err))
+			return nil, err
+		}
 	}
 
 	return &Database{
@@ -159,6 +171,7 @@ func (db *Database) GetProducts(tags []string, order string, pageNum, pageSize i
 	// Execute the query
 	err := query.WithContext(ctx).Find(&products).Error
 	if err != nil {
+		slog.Error("Product list query failed", "error_type", fmt.Sprintf("%T", err))
 		return nil, err
 	}
 
@@ -174,6 +187,9 @@ func (db *Database) GetProduct(id string, ctx context.Context) (*model.Product, 
 		First(&product).Error
 
 	if err != nil {
+		if err != gorm.ErrRecordNotFound {
+			slog.Error("Product lookup failed", "error_type", fmt.Sprintf("%T", err))
+		}
 		return nil, err
 	}
 
@@ -195,6 +211,7 @@ func (db *Database) CountProducts(tags []string, ctx context.Context) (int, erro
 
 	err := query.Count(&count).Error
 	if err != nil {
+		slog.Error("Product count query failed", "error_type", fmt.Sprintf("%T", err))
 		return 0, err
 	}
 
@@ -210,6 +227,7 @@ func (db *Database) GetTags(ctx context.Context) ([]model.Tag, error) {
 		Find(&tags).Error
 
 	if err != nil {
+		slog.Error("Tag query failed", "error_type", fmt.Sprintf("%T", err))
 		return nil, fmt.Errorf("failed to fetch tags: %w", err)
 	}
 
