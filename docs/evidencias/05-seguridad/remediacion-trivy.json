@@ -2756,5 +2756,46 @@
         ]
       }
     }
-  }
+  },
+  "exceptions": [
+    {
+      "id": "CVE-2026-112366",
+      "advisory": "GHSA-fc5q-39xc-vjpf",
+      "package": "pkg:npm/picomatch@2.3.2",
+      "severity": "HIGH",
+      "status": "sin parche: afecta a todas las versiones <= 4.0.7",
+      "detected": "2026-11-17, CI del PR #66 (gates SCA e imagen de ui); el CVE se publicó el 2026-10-19 y entró en la base de Trivy después de la remediación",
+      "dependency_chain": [
+        "ui",
+        "http-proxy-middleware 3.0.11",
+        "micromatch 4.0.8",
+        "picomatch 2.3.2"
+      ],
+      "justification": "ui no configura pathFilter en http-proxy-middleware: con el filtro por defecto (\"/\") se compara como texto y nunca se llama a micromatch ni a picomatch. Además los patrones los define el código, no el request, que es lo que haría falta para el ReDoS.",
+      "scope": "Solo ese CVE y esa versión exacta del paquete (.trivyignore.yaml); el resto de los hallazgos CRITICAL/HIGH sigue bloqueando.",
+      "expires": "2026-12-31",
+      "on_expiry": "El gate vuelve a bloquear: revisar si hay parche (actualizar) o renovar la excepción con una nueva revisión.",
+      "validation": {
+        "trivy": "0.76.2",
+        "fs_without_exception": {
+          "exit_code": 1,
+          "high": 1
+        },
+        "fs_with_exception": {
+          "exit_code": 0,
+          "high": 0,
+          "suppressed": 1
+        },
+        "image_ui_dd0abff_with_exception": {
+          "exit_code": 0,
+          "high": 0,
+          "suppressed": 1
+        },
+        "fs_with_expired_exception": {
+          "exit_code": 1,
+          "high": 1
+        }
+      }
+    }
+  ]
 }

@@ -1,0 +1,12 @@
+# Excepciones revisadas de los gates de Trivy (SCA e imágenes bloquean CRITICAL/HIGH, con o sin parche).
+# Cada una se limita a un CVE y a la versión exacta del paquete, explica por qué no aplica y vence sola:
+# al vencer, el gate vuelve a bloquear y hay que revisarla de nuevo. Registro: docs/evidencias/05-seguridad.
+vulnerabilities:
+  - id: CVE-2026-112366 # GHSA-fc5q-39xc-vjpf
+    purls:
+      - pkg:npm/picomatch@2.3.2
+    statement: >-
+      ReDoS en patrones extglob de picomatch, sin parche en ninguna versión (<= 4.0.7). Llega a ui por
+      http-proxy-middleware 3 -> micromatch 4. ui no configura pathFilter, así que http-proxy-middleware no
+      llama a micromatch ni a picomatch, y los patrones nunca vienen del request. Revisar cuando haya parche.
+    expired_at: 2026-12-31
