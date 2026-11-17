@@ -1,6 +1,6 @@
 
 
-import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ICheckoutRepository } from './ICheckoutRepository';
 import { Redis } from 'ioredis';
 
@@ -8,6 +8,7 @@ import { Redis } from 'ioredis';
 export class RedisCheckoutRepository
   implements ICheckoutRepository, OnModuleDestroy
 {
+  private readonly logger = new Logger(RedisCheckoutRepository.name);
   private _client: Redis;
   private _readClient: Redis;
 
@@ -47,7 +48,7 @@ export class RedisCheckoutRepository
         this._readClient = null;
       }
     } catch (error) {
-      console.error('Error closing Redis connections:', error);
+      this.logger.error('Error closing Redis connections');
       throw error;
     }
   }
@@ -76,7 +77,7 @@ export class RedisCheckoutRepository
       await client.ping();
       return true;
     } catch (error) {
-      console.error('Redis health check failed:', error);
+      this.logger.error('Redis health check failed');
       return false;
     }
   }
