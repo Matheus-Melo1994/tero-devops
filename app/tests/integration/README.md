@@ -40,7 +40,7 @@ Estas pruebas no cubren Admin, interfaz visual, rendimiento ni durabilidad ante 
 
 El job `Pruebas de integración` de `.github/workflows/ci.yml` corre en cada PR y cada push a `main`. Genera credenciales efímeras, construye los cinco servicios usados por los casos y ejecuta la suite con el mismo Compose. El job de build sigue construyendo y escaneando las seis imágenes, incluida Admin.
 
-El código de salida de las pruebas determina el resultado del job. La publicación en GHCR requiere que aprueben tanto `build` como `integration`; solo se publica desde `main`.
+El código de salida de las pruebas determina el resultado del job. La publicación en GHCR requiere que aprueben todos los controles (`gitleaks`, `sast`, `quality`, `sca`, `build` e `integration`); solo se publica desde `main`.
 
 El artifact `integration-results` conserva durante 30 días el reporte `integration.tap` y los logs `compose.log`, incluso si fallan los tests. Las credenciales no se incluyen en el artifact.
 

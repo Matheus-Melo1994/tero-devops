@@ -10,9 +10,12 @@ COPY .yarn ./.yarn
 RUN yarn install --immutable
 COPY . .
 RUN yarn build
+RUN yarn workspaces focus --all --production
 
 # ---- Etapa 2: runtime (imagen final) ----
 FROM node:22-alpine
+RUN rm -rf /usr/local/lib/node_modules/npm /opt/yarn-* \
+    && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/yarn /usr/local/bin/yarnpkg
 WORKDIR /app
 COPY --from=builder /src/dist ./dist
 COPY --from=builder /src/node_modules ./node_modules

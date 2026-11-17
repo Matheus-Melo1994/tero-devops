@@ -1,0 +1,2760 @@
+{
+  "base_commit": "f1ce97535e3a7febeec66fa3fbdf898c7f36f4d0",
+  "trivy": "0.76.2",
+  "database_updated_at": "2026-11-16T13:03:44.830426244Z",
+  "policy": {
+    "severity": [
+      "HIGH",
+      "CRITICAL"
+    ],
+    "exit_code": 1,
+    "ignore_unfixed": false
+  },
+  "before": {
+    "image-admin": {
+      "id": "sha256:1e84b9342f4def266d4fc33b94ad89253aad829534c7ca878173f460d7fc38e6",
+      "artifact": "tero-baseline/admin:f1ce975",
+      "targets": [
+        {
+          "target": "tero-baseline/admin:f1ce975 (alpine 3.24.4)",
+          "type": "alpine",
+          "packages": 19,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        },
+        {
+          "target": "Node.js",
+          "type": "node-pkg",
+          "packages": 296,
+          "high": 10,
+          "critical": 0,
+          "findings": [
+            {
+              "id": "CVE-2026-102276",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "5.0.10, 3.0.7, 2.1.5, 1.1.19",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-102278",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "5.0.11, 3.0.8, 2.1.6, 1.1.20",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-13149",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "5.0.7, 1.1.16, 2.1.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-14257",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "5.0.8, 3.0.3, 2.1.3, 1.1.17",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-69152",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "1.1.18, 2.1.4, 3.0.6, 5.0.9",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-69192",
+              "package": "ip-address",
+              "installed": "10.1.0",
+              "fixed": "10.3.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-9496",
+              "package": "pacote",
+              "installed": "19.0.2",
+              "fixed": "21.5.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-9496",
+              "package": "pacote",
+              "installed": "20.0.1",
+              "fixed": "21.5.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-33671",
+              "package": "picomatch",
+              "installed": "4.0.3",
+              "fixed": "4.0.4, 3.0.2, 2.3.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-48815",
+              "package": "sigstore",
+              "installed": "3.1.0",
+              "fixed": "4.1.1",
+              "severity": "HIGH"
+            }
+          ]
+        }
+      ]
+    },
+    "image-cart": {
+      "id": "sha256:937d2c6184e2662e558811703f9db192e4118a73c9a03e6c46a89e941a13a362",
+      "artifact": "tero-baseline/cart:f1ce975",
+      "targets": [
+        {
+          "target": "tero-baseline/cart:f1ce975 (debian 13.7)",
+          "type": "debian",
+          "packages": 87,
+          "high": 49,
+          "critical": 0,
+          "findings": [
+            {
+              "id": "CVE-2026-76642",
+              "package": "bsdutils",
+              "installed": "1:2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78408",
+              "package": "bsdutils",
+              "installed": "1:2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78409",
+              "package": "bsdutils",
+              "installed": "1:2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78410",
+              "package": "bsdutils",
+              "installed": "1:2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-54369",
+              "package": "libacl1",
+              "installed": "2.3.2-2+b1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-76642",
+              "package": "libblkid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78408",
+              "package": "libblkid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78409",
+              "package": "libblkid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78410",
+              "package": "libblkid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-76642",
+              "package": "liblastlog2-2",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78408",
+              "package": "liblastlog2-2",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78409",
+              "package": "liblastlog2-2",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78410",
+              "package": "liblastlog2-2",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-76642",
+              "package": "libmount1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78408",
+              "package": "libmount1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78409",
+              "package": "libmount1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78410",
+              "package": "libmount1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2025-69720",
+              "package": "libncursesw6",
+              "installed": "6.5+20250216-2",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-76642",
+              "package": "libsmartcols1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78408",
+              "package": "libsmartcols1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78409",
+              "package": "libsmartcols1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78410",
+              "package": "libsmartcols1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-119373",
+              "package": "libsqlite3-0",
+              "installed": "3.46.1-7+deb13u2",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-119374",
+              "package": "libsqlite3-0",
+              "installed": "3.46.1-7+deb13u2",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-119379",
+              "package": "libsqlite3-0",
+              "installed": "3.46.1-7+deb13u2",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-16742",
+              "package": "libsystemd0",
+              "installed": "257.13-1~deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2025-69720",
+              "package": "libtinfo6",
+              "installed": "6.5+20250216-2",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-16742",
+              "package": "libudev1",
+              "installed": "257.13-1~deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-76642",
+              "package": "libuuid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78408",
+              "package": "libuuid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78409",
+              "package": "libuuid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78410",
+              "package": "libuuid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-76642",
+              "package": "login",
+              "installed": "1:4.16.0-2+really2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78408",
+              "package": "login",
+              "installed": "1:4.16.0-2+really2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78409",
+              "package": "login",
+              "installed": "1:4.16.0-2+really2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78410",
+              "package": "login",
+              "installed": "1:4.16.0-2+really2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-76642",
+              "package": "mount",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78408",
+              "package": "mount",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78409",
+              "package": "mount",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78410",
+              "package": "mount",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2025-69720",
+              "package": "ncurses-base",
+              "installed": "6.5+20250216-2",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2025-69720",
+              "package": "ncurses-bin",
+              "installed": "6.5+20250216-2",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-9538",
+              "package": "perl-base",
+              "installed": "5.40.1-6+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-76642",
+              "package": "util-linux",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78408",
+              "package": "util-linux",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78409",
+              "package": "util-linux",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78410",
+              "package": "util-linux",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": null,
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-76844",
+              "package": "zlib1g",
+              "installed": "1:1.3.dfsg+really1.3.1-1+b1",
+              "fixed": "1:1.3.dfsg+really1.3.1-1+deb13u1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-85091",
+              "package": "zlib1g",
+              "installed": "1:1.3.dfsg+really1.3.1-1+b1",
+              "fixed": "1:1.3.dfsg+really1.3.1-1+deb13u1",
+              "severity": "HIGH"
+            }
+          ]
+        },
+        {
+          "target": "Python",
+          "type": "python-pkg",
+          "packages": 21,
+          "high": 3,
+          "critical": 0,
+          "findings": [
+            {
+              "id": "CVE-2024-47874",
+              "package": "starlette",
+              "installed": "0.38.6",
+              "fixed": "0.40.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-48818",
+              "package": "starlette",
+              "installed": "0.38.6",
+              "fixed": "1.1.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-54283",
+              "package": "starlette",
+              "installed": "0.38.6",
+              "fixed": "1.3.1",
+              "severity": "HIGH"
+            }
+          ]
+        }
+      ]
+    },
+    "image-catalog": {
+      "id": "sha256:07e1e4e682ff81c4247bc7746fd66910b277c2829468b0c015f6f6a9da91601c",
+      "artifact": "tero-baseline/catalog:f1ce975",
+      "targets": [
+        {
+          "target": "tero-baseline/catalog:f1ce975 (alpine 3.20.10)",
+          "type": "alpine",
+          "packages": 15,
+          "high": 2,
+          "critical": 0,
+          "findings": [
+            {
+              "id": "CVE-2026-107891",
+              "package": "musl",
+              "installed": "1.2.5-r3",
+              "fixed": "1.2.5-r4",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-107891",
+              "package": "musl-utils",
+              "installed": "1.2.5-r3",
+              "fixed": "1.2.5-r4",
+              "severity": "HIGH"
+            }
+          ]
+        },
+        {
+          "target": "app/catalog",
+          "type": "gobinary",
+          "packages": 58,
+          "high": 49,
+          "critical": 3,
+          "findings": [
+            {
+              "id": "CVE-2026-33815",
+              "package": "github.com/jackc/pgx/v5",
+              "installed": "v5.6.0",
+              "fixed": "5.9.0",
+              "severity": "CRITICAL"
+            },
+            {
+              "id": "CVE-2026-33816",
+              "package": "github.com/jackc/pgx/v5",
+              "installed": "v5.6.0",
+              "fixed": "5.9.0",
+              "severity": "CRITICAL"
+            },
+            {
+              "id": "CVE-2026-63209",
+              "package": "github.com/klauspost/compress",
+              "installed": "v1.17.11",
+              "fixed": "1.18.7",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-29181",
+              "package": "go.opentelemetry.io/otel",
+              "installed": "v1.37.0",
+              "fixed": "1.41.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-24051",
+              "package": "go.opentelemetry.io/otel/sdk",
+              "installed": "v1.37.0",
+              "fixed": "1.40.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39883",
+              "package": "go.opentelemetry.io/otel/sdk",
+              "installed": "v1.37.0",
+              "fixed": "1.43.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39828",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.45.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39829",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.45.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39830",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.45.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39831",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.45.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39832",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.45.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39835",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.45.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-42508",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.45.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-46595",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.45.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-46597",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.45.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56854",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.45.0",
+              "fixed": "0.55.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-25681",
+              "package": "golang.org/x/net",
+              "installed": "v0.47.0",
+              "fixed": "0.55.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-27136",
+              "package": "golang.org/x/net",
+              "installed": "v0.47.0",
+              "fixed": "0.55.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-33814",
+              "package": "golang.org/x/net",
+              "installed": "v0.47.0",
+              "fixed": "0.53.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39821",
+              "package": "golang.org/x/net",
+              "installed": "v0.47.0",
+              "fixed": "0.55.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-46600",
+              "package": "golang.org/x/net",
+              "installed": "v0.47.0",
+              "fixed": "0.56.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78661",
+              "package": "golang.org/x/net",
+              "installed": "v0.47.0",
+              "fixed": "0.62.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78669",
+              "package": "golang.org/x/net",
+              "installed": "v0.47.0",
+              "fixed": "0.60.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56851",
+              "package": "golang.org/x/text",
+              "installed": "v0.31.0",
+              "fixed": "0.41.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56852",
+              "package": "golang.org/x/text",
+              "installed": "v0.31.0",
+              "fixed": "0.39.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-33186",
+              "package": "google.golang.org/grpc",
+              "installed": "v1.73.0",
+              "fixed": "1.79.3",
+              "severity": "CRITICAL"
+            },
+            {
+              "id": "CVE-2026-84304",
+              "package": "google.golang.org/grpc",
+              "installed": "v1.73.0",
+              "fixed": "1.83.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-84445",
+              "package": "google.golang.org/grpc",
+              "installed": "v1.73.0",
+              "fixed": "1.82.2, 1.83.2, 1.84.0-dev.0.20260825144003-d5a41119e0e3, 1.85.0-dev.0.20260825072537-93e31b48545e",
+              "severity": "HIGH"
+            },
+            {
+              "id": "GHSA-hrxh-6v49-42gf",
+              "package": "google.golang.org/grpc",
+              "installed": "v1.73.0",
+              "fixed": "1.82.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-111943",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.26.10, 1.27.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-25679",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.8, 1.26.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-27145",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.11, 1.26.4",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-32280",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.9, 1.26.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-32281",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.9, 1.26.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-32283",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.9, 1.26.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-33811",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.10, 1.26.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-33814",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.10, 1.26.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-33818",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.13, 1.26.6, 1.27.0-rc.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39820",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.10, 1.26.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39821",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.13, 1.26.6, 1.27.0-rc.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39822",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.12, 1.26.5, 1.27.0-rc.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39836",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.10, 1.26.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-42499",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.10, 1.26.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-42504",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.11, 1.26.4",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56853",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.13, 1.26.6, 1.27.0-rc.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56858",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.13, 1.26.6, 1.27.0-rc.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56859",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.13, 1.26.6, 1.27.0-rc.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56860",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.13, 1.26.6, 1.27.0-rc.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56862",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.13, 1.26.6, 1.27.0-rc.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78667",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.26.9, 1.27.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78669",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.26.9, 1.27.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-97031",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.26.9, 1.27.2",
+              "severity": "HIGH"
+            }
+          ]
+        }
+      ]
+    },
+    "image-checkout": {
+      "id": "sha256:263f19e7b31485ab6558662838d840ccca99b26f926fe20b12eaecc3914d6fea",
+      "artifact": "tero-baseline/checkout:f1ce975",
+      "targets": [
+        {
+          "target": "tero-baseline/checkout:f1ce975 (alpine 3.24.4)",
+          "type": "alpine",
+          "packages": 19,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        },
+        {
+          "target": "Node.js",
+          "type": "node-pkg",
+          "packages": 608,
+          "high": 55,
+          "critical": 1,
+          "findings": [
+            {
+              "id": "CVE-2026-111181",
+              "package": "body-parser",
+              "installed": "2.2.2",
+              "fixed": "2.4.0, 1.20.9",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-102276",
+              "package": "brace-expansion",
+              "installed": "1.1.13",
+              "fixed": "5.0.10, 3.0.7, 2.1.5, 1.1.19",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-102278",
+              "package": "brace-expansion",
+              "installed": "1.1.13",
+              "fixed": "5.0.11, 3.0.8, 2.1.6, 1.1.20",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-13149",
+              "package": "brace-expansion",
+              "installed": "1.1.13",
+              "fixed": "5.0.7, 1.1.16, 2.1.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-14257",
+              "package": "brace-expansion",
+              "installed": "1.1.13",
+              "fixed": "5.0.8, 3.0.3, 2.1.3, 1.1.17",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-69152",
+              "package": "brace-expansion",
+              "installed": "1.1.13",
+              "fixed": "1.1.18, 2.1.4, 3.0.6, 5.0.9",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-102276",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "5.0.10, 3.0.7, 2.1.5, 1.1.19",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-102276",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "5.0.10, 3.0.7, 2.1.5, 1.1.19",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-102278",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "5.0.11, 3.0.8, 2.1.6, 1.1.20",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-102278",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "5.0.11, 3.0.8, 2.1.6, 1.1.20",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-13149",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "5.0.7, 1.1.16, 2.1.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-13149",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "5.0.7, 1.1.16, 2.1.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-14257",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "5.0.8, 3.0.3, 2.1.3, 1.1.17",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-14257",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "5.0.8, 3.0.3, 2.1.3, 1.1.17",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-69152",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "1.1.18, 2.1.4, 3.0.6, 5.0.9",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-69152",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "1.1.18, 2.1.4, 3.0.6, 5.0.9",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-73088",
+              "package": "browserslist",
+              "installed": "4.24.4",
+              "fixed": "4.28.7",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-73089",
+              "package": "browserslist",
+              "installed": "4.24.4",
+              "fixed": "4.28.7",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-13676",
+              "package": "fast-uri",
+              "installed": "3.0.5",
+              "fixed": "4.0.1, 3.1.3, 2.4.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-16221",
+              "package": "fast-uri",
+              "installed": "3.0.5",
+              "fixed": "2.4.3, 3.1.4, 4.1.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-18446",
+              "package": "fast-uri",
+              "installed": "3.0.5",
+              "fixed": "2.4.4, 3.1.5, 4.1.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-6321",
+              "package": "fast-uri",
+              "installed": "3.0.5",
+              "fixed": "3.1.1, 2.4.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-6322",
+              "package": "fast-uri",
+              "installed": "3.0.5",
+              "fixed": "3.1.2, 2.4.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-75975",
+              "package": "fast-uri",
+              "installed": "3.0.5",
+              "fixed": "2.4.5, 3.1.6, 4.1.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-76172",
+              "package": "fast-uri",
+              "installed": "3.0.5",
+              "fixed": "2.4.5, 3.1.6, 4.1.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-84292",
+              "package": "fast-uri",
+              "installed": "3.0.5",
+              "fixed": "2.4.6, 3.1.7, 4.1.4",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2025-64756",
+              "package": "glob",
+              "installed": "11.0.1",
+              "fixed": "11.1.0, 10.5.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-69192",
+              "package": "ip-address",
+              "installed": "10.1.0",
+              "fixed": "10.3.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-59869",
+              "package": "js-yaml",
+              "installed": "4.1.0",
+              "fixed": "3.15.0, 4.3.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-84375",
+              "package": "js-yaml",
+              "installed": "4.1.0",
+              "fixed": "4.3.2, 3.15.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "GHSA-5p4m-2wfm-xmqj",
+              "package": "js-yaml",
+              "installed": "4.1.0",
+              "fixed": "4.3.1, 3.15.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-4800",
+              "package": "lodash",
+              "installed": "4.17.21",
+              "fixed": "4.18.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-26996",
+              "package": "minimatch",
+              "installed": "10.0.1",
+              "fixed": "10.2.1, 9.0.6, 8.0.5, 7.4.7, 6.2.1, 5.1.7, 4.2.4, 3.1.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-27903",
+              "package": "minimatch",
+              "installed": "10.0.1",
+              "fixed": "10.2.3, 9.0.7, 8.0.6, 7.4.8, 6.2.2, 5.1.8, 4.2.5, 3.1.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-27904",
+              "package": "minimatch",
+              "installed": "10.0.1",
+              "fixed": "10.2.3, 9.0.7, 8.0.6, 7.4.8, 6.2.2, 5.1.8, 4.2.5, 3.1.4",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-26996",
+              "package": "minimatch",
+              "installed": "3.1.2",
+              "fixed": "10.2.1, 9.0.6, 8.0.5, 7.4.7, 6.2.1, 5.1.7, 4.2.4, 3.1.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-27903",
+              "package": "minimatch",
+              "installed": "3.1.2",
+              "fixed": "10.2.3, 9.0.7, 8.0.6, 7.4.8, 6.2.2, 5.1.8, 4.2.5, 3.1.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-27904",
+              "package": "minimatch",
+              "installed": "3.1.2",
+              "fixed": "10.2.3, 9.0.7, 8.0.6, 7.4.8, 6.2.2, 5.1.8, 4.2.5, 3.1.4",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2025-7338",
+              "package": "multer",
+              "installed": "2.0.1",
+              "fixed": "2.0.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-113872",
+              "package": "multer",
+              "installed": "2.0.1",
+              "fixed": "2.5.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-2359",
+              "package": "multer",
+              "installed": "2.0.1",
+              "fixed": "2.1.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-3304",
+              "package": "multer",
+              "installed": "2.0.1",
+              "fixed": "2.1.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-3520",
+              "package": "multer",
+              "installed": "2.0.1",
+              "fixed": "2.1.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-5079",
+              "package": "multer",
+              "installed": "2.0.1",
+              "fixed": "2.2.0, 3.0.0-alpha.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-77078",
+              "package": "multer",
+              "installed": "2.0.1",
+              "fixed": "2.3.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-82333",
+              "package": "multer",
+              "installed": "2.0.1",
+              "fixed": "2.3.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-9496",
+              "package": "pacote",
+              "installed": "19.0.2",
+              "fixed": "21.5.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-9496",
+              "package": "pacote",
+              "installed": "20.0.1",
+              "fixed": "21.5.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-4926",
+              "package": "path-to-regexp",
+              "installed": "8.2.0",
+              "fixed": "8.4.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-33671",
+              "package": "picomatch",
+              "installed": "2.3.1",
+              "fixed": "4.0.4, 3.0.2, 2.3.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-33671",
+              "package": "picomatch",
+              "installed": "4.0.2",
+              "fixed": "4.0.4, 3.0.2, 2.3.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-33671",
+              "package": "picomatch",
+              "installed": "4.0.3",
+              "fixed": "4.0.4, 3.0.2, 2.3.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-90711",
+              "package": "proxy-addr",
+              "installed": "2.0.7",
+              "fixed": "2.0.8",
+              "severity": "CRITICAL"
+            },
+            {
+              "id": "GHSA-5c6j-r48x-rmvq",
+              "package": "serialize-javascript",
+              "installed": "6.0.2",
+              "fixed": "7.0.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-48815",
+              "package": "sigstore",
+              "installed": "3.1.0",
+              "fixed": "4.1.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-44705",
+              "package": "tmp",
+              "installed": "0.0.33",
+              "fixed": "0.2.6",
+              "severity": "HIGH"
+            }
+          ]
+        }
+      ]
+    },
+    "image-orders": {
+      "id": "sha256:84cc4d9b9dbe5793c6b75c353720d1d039e5764fb8ffde2b6c7db44f42ac6fbc",
+      "artifact": "tero-baseline/orders:f1ce975",
+      "targets": [
+        {
+          "target": "tero-baseline/orders:f1ce975 (alpine 3.20.10)",
+          "type": "alpine",
+          "packages": 15,
+          "high": 2,
+          "critical": 0,
+          "findings": [
+            {
+              "id": "CVE-2026-107891",
+              "package": "musl",
+              "installed": "1.2.5-r3",
+              "fixed": "1.2.5-r4",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-107891",
+              "package": "musl-utils",
+              "installed": "1.2.5-r3",
+              "fixed": "1.2.5-r4",
+              "severity": "HIGH"
+            }
+          ]
+        },
+        {
+          "target": "app/orders",
+          "type": "gobinary",
+          "packages": 38,
+          "high": 43,
+          "critical": 2,
+          "findings": [
+            {
+              "id": "CVE-2026-33815",
+              "package": "github.com/jackc/pgx/v5",
+              "installed": "v5.6.0",
+              "fixed": "5.9.0",
+              "severity": "CRITICAL"
+            },
+            {
+              "id": "CVE-2026-33816",
+              "package": "github.com/jackc/pgx/v5",
+              "installed": "v5.6.0",
+              "fixed": "5.9.0",
+              "severity": "CRITICAL"
+            },
+            {
+              "id": "CVE-2025-47913",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.43.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39828",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39829",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39830",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39831",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39832",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39835",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-42508",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-46595",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-46597",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56854",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.55.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-25681",
+              "package": "golang.org/x/net",
+              "installed": "v0.43.0",
+              "fixed": "0.55.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-27136",
+              "package": "golang.org/x/net",
+              "installed": "v0.43.0",
+              "fixed": "0.55.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-33814",
+              "package": "golang.org/x/net",
+              "installed": "v0.43.0",
+              "fixed": "0.53.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39821",
+              "package": "golang.org/x/net",
+              "installed": "v0.43.0",
+              "fixed": "0.55.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-46600",
+              "package": "golang.org/x/net",
+              "installed": "v0.43.0",
+              "fixed": "0.56.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78661",
+              "package": "golang.org/x/net",
+              "installed": "v0.43.0",
+              "fixed": "0.62.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78669",
+              "package": "golang.org/x/net",
+              "installed": "v0.43.0",
+              "fixed": "0.60.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56851",
+              "package": "golang.org/x/text",
+              "installed": "v0.28.0",
+              "fixed": "0.41.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56852",
+              "package": "golang.org/x/text",
+              "installed": "v0.28.0",
+              "fixed": "0.39.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-111943",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.26.10, 1.27.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-25679",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.8, 1.26.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-27145",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.11, 1.26.4",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-32280",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.9, 1.26.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-32281",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.9, 1.26.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-32283",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.9, 1.26.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-33811",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.10, 1.26.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-33814",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.10, 1.26.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-33818",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.13, 1.26.6, 1.27.0-rc.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39820",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.10, 1.26.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39821",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.13, 1.26.6, 1.27.0-rc.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39822",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.12, 1.26.5, 1.27.0-rc.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39836",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.10, 1.26.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-42499",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.10, 1.26.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-42504",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.11, 1.26.4",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56853",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.13, 1.26.6, 1.27.0-rc.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56858",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.13, 1.26.6, 1.27.0-rc.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56859",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.13, 1.26.6, 1.27.0-rc.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56860",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.13, 1.26.6, 1.27.0-rc.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56862",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.25.13, 1.26.6, 1.27.0-rc.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78667",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.26.9, 1.27.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78669",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.26.9, 1.27.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-97031",
+              "package": "stdlib",
+              "installed": "v1.24.13",
+              "fixed": "1.26.9, 1.27.2",
+              "severity": "HIGH"
+            }
+          ]
+        }
+      ]
+    },
+    "image-ui": {
+      "id": "sha256:d46429750ed90a631a275dd5973373576b97c28bf0029076d0bd80c257c3524b",
+      "artifact": "tero-baseline/ui:f1ce975",
+      "targets": [
+        {
+          "target": "tero-baseline/ui:f1ce975 (alpine 3.24.4)",
+          "type": "alpine",
+          "packages": 19,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        },
+        {
+          "target": "Node.js",
+          "type": "node-pkg",
+          "packages": 286,
+          "high": 10,
+          "critical": 0,
+          "findings": [
+            {
+              "id": "CVE-2026-102276",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "5.0.10, 3.0.7, 2.1.5, 1.1.19",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-102278",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "5.0.11, 3.0.8, 2.1.6, 1.1.20",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-13149",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "5.0.7, 1.1.16, 2.1.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-14257",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "5.0.8, 3.0.3, 2.1.3, 1.1.17",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-69152",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "1.1.18, 2.1.4, 3.0.6, 5.0.9",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-69192",
+              "package": "ip-address",
+              "installed": "10.1.0",
+              "fixed": "10.3.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-9496",
+              "package": "pacote",
+              "installed": "19.0.2",
+              "fixed": "21.5.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-9496",
+              "package": "pacote",
+              "installed": "20.0.1",
+              "fixed": "21.5.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-33671",
+              "package": "picomatch",
+              "installed": "4.0.3",
+              "fixed": "4.0.4, 3.0.2, 2.3.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-48815",
+              "package": "sigstore",
+              "installed": "3.1.0",
+              "fixed": "4.1.1",
+              "severity": "HIGH"
+            }
+          ]
+        }
+      ]
+    },
+    "sca": {
+      "id": null,
+      "artifact": "app/src",
+      "targets": [
+        {
+          "target": "cart/requirements.txt",
+          "type": "pip",
+          "packages": 5,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        },
+        {
+          "target": "catalog/go.mod",
+          "type": "gomod",
+          "packages": 67,
+          "high": 26,
+          "critical": 3,
+          "findings": [
+            {
+              "id": "CVE-2026-33815",
+              "package": "github.com/jackc/pgx/v5",
+              "installed": "v5.6.0",
+              "fixed": "5.9.0",
+              "severity": "CRITICAL"
+            },
+            {
+              "id": "CVE-2026-33816",
+              "package": "github.com/jackc/pgx/v5",
+              "installed": "v5.6.0",
+              "fixed": "5.9.0",
+              "severity": "CRITICAL"
+            },
+            {
+              "id": "CVE-2026-63209",
+              "package": "github.com/klauspost/compress",
+              "installed": "v1.17.11",
+              "fixed": "1.18.7",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-29181",
+              "package": "go.opentelemetry.io/otel",
+              "installed": "v1.37.0",
+              "fixed": "1.41.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-24051",
+              "package": "go.opentelemetry.io/otel/sdk",
+              "installed": "v1.37.0",
+              "fixed": "1.40.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39883",
+              "package": "go.opentelemetry.io/otel/sdk",
+              "installed": "v1.37.0",
+              "fixed": "1.43.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39828",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.45.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39829",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.45.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39830",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.45.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39831",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.45.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39832",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.45.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39835",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.45.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-42508",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.45.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-46595",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.45.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-46597",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.45.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56854",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.45.0",
+              "fixed": "0.55.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-25681",
+              "package": "golang.org/x/net",
+              "installed": "v0.47.0",
+              "fixed": "0.55.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-27136",
+              "package": "golang.org/x/net",
+              "installed": "v0.47.0",
+              "fixed": "0.55.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-33814",
+              "package": "golang.org/x/net",
+              "installed": "v0.47.0",
+              "fixed": "0.53.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39821",
+              "package": "golang.org/x/net",
+              "installed": "v0.47.0",
+              "fixed": "0.55.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-46600",
+              "package": "golang.org/x/net",
+              "installed": "v0.47.0",
+              "fixed": "0.56.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78661",
+              "package": "golang.org/x/net",
+              "installed": "v0.47.0",
+              "fixed": "0.62.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78669",
+              "package": "golang.org/x/net",
+              "installed": "v0.47.0",
+              "fixed": "0.60.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56851",
+              "package": "golang.org/x/text",
+              "installed": "v0.31.0",
+              "fixed": "0.41.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56852",
+              "package": "golang.org/x/text",
+              "installed": "v0.31.0",
+              "fixed": "0.39.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-33186",
+              "package": "google.golang.org/grpc",
+              "installed": "v1.73.0",
+              "fixed": "1.79.3",
+              "severity": "CRITICAL"
+            },
+            {
+              "id": "CVE-2026-84304",
+              "package": "google.golang.org/grpc",
+              "installed": "v1.73.0",
+              "fixed": "1.83.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-84445",
+              "package": "google.golang.org/grpc",
+              "installed": "v1.73.0",
+              "fixed": "1.82.2, 1.83.2, 1.84.0-dev.0.20260825144003-d5a41119e0e3, 1.85.0-dev.0.20260825072537-93e31b48545e",
+              "severity": "HIGH"
+            },
+            {
+              "id": "GHSA-hrxh-6v49-42gf",
+              "package": "google.golang.org/grpc",
+              "installed": "v1.73.0",
+              "fixed": "1.82.1",
+              "severity": "HIGH"
+            }
+          ]
+        },
+        {
+          "target": "checkout/yarn.lock",
+          "type": "yarn",
+          "packages": 175,
+          "high": 23,
+          "critical": 1,
+          "findings": [
+            {
+              "id": "CVE-2026-111181",
+              "package": "body-parser",
+              "installed": "2.2.2",
+              "fixed": "2.4.0, 1.20.9",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-102276",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "5.0.10, 3.0.7, 2.1.5, 1.1.19",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-102278",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "5.0.11, 3.0.8, 2.1.6, 1.1.20",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-13149",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "5.0.7, 1.1.16, 2.1.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-14257",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "5.0.8, 3.0.3, 2.1.3, 1.1.17",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-69152",
+              "package": "brace-expansion",
+              "installed": "2.0.2",
+              "fixed": "1.1.18, 2.1.4, 3.0.6, 5.0.9",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2025-64756",
+              "package": "glob",
+              "installed": "11.0.1",
+              "fixed": "11.1.0, 10.5.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-59869",
+              "package": "js-yaml",
+              "installed": "4.1.0",
+              "fixed": "3.15.0, 4.3.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-84375",
+              "package": "js-yaml",
+              "installed": "4.1.0",
+              "fixed": "4.3.2, 3.15.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "GHSA-5p4m-2wfm-xmqj",
+              "package": "js-yaml",
+              "installed": "4.1.0",
+              "fixed": "4.3.1, 3.15.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-4800",
+              "package": "lodash",
+              "installed": "4.17.21",
+              "fixed": "4.18.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-26996",
+              "package": "minimatch",
+              "installed": "10.0.1",
+              "fixed": "10.2.1, 9.0.6, 8.0.5, 7.4.7, 6.2.1, 5.1.7, 4.2.4, 3.1.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-27903",
+              "package": "minimatch",
+              "installed": "10.0.1",
+              "fixed": "10.2.3, 9.0.7, 8.0.6, 7.4.8, 6.2.2, 5.1.8, 4.2.5, 3.1.3",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-27904",
+              "package": "minimatch",
+              "installed": "10.0.1",
+              "fixed": "10.2.3, 9.0.7, 8.0.6, 7.4.8, 6.2.2, 5.1.8, 4.2.5, 3.1.4",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2025-7338",
+              "package": "multer",
+              "installed": "2.0.1",
+              "fixed": "2.0.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-113872",
+              "package": "multer",
+              "installed": "2.0.1",
+              "fixed": "2.5.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-2359",
+              "package": "multer",
+              "installed": "2.0.1",
+              "fixed": "2.1.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-3304",
+              "package": "multer",
+              "installed": "2.0.1",
+              "fixed": "2.1.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-3520",
+              "package": "multer",
+              "installed": "2.0.1",
+              "fixed": "2.1.1",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-5079",
+              "package": "multer",
+              "installed": "2.0.1",
+              "fixed": "2.2.0, 3.0.0-alpha.2",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-77078",
+              "package": "multer",
+              "installed": "2.0.1",
+              "fixed": "2.3.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-82333",
+              "package": "multer",
+              "installed": "2.0.1",
+              "fixed": "2.3.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-4926",
+              "package": "path-to-regexp",
+              "installed": "8.2.0",
+              "fixed": "8.4.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-90711",
+              "package": "proxy-addr",
+              "installed": "2.0.7",
+              "fixed": "2.0.8",
+              "severity": "CRITICAL"
+            }
+          ]
+        },
+        {
+          "target": "orders/go.mod",
+          "type": "gomod",
+          "packages": 50,
+          "high": 20,
+          "critical": 2,
+          "findings": [
+            {
+              "id": "CVE-2026-33815",
+              "package": "github.com/jackc/pgx/v5",
+              "installed": "v5.6.0",
+              "fixed": "5.9.0",
+              "severity": "CRITICAL"
+            },
+            {
+              "id": "CVE-2026-33816",
+              "package": "github.com/jackc/pgx/v5",
+              "installed": "v5.6.0",
+              "fixed": "5.9.0",
+              "severity": "CRITICAL"
+            },
+            {
+              "id": "CVE-2025-47913",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.43.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39828",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39829",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39830",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39831",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39832",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39835",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-42508",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-46595",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-46597",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.52.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56854",
+              "package": "golang.org/x/crypto",
+              "installed": "v0.41.0",
+              "fixed": "0.55.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-25681",
+              "package": "golang.org/x/net",
+              "installed": "v0.43.0",
+              "fixed": "0.55.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-27136",
+              "package": "golang.org/x/net",
+              "installed": "v0.43.0",
+              "fixed": "0.55.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-33814",
+              "package": "golang.org/x/net",
+              "installed": "v0.43.0",
+              "fixed": "0.53.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-39821",
+              "package": "golang.org/x/net",
+              "installed": "v0.43.0",
+              "fixed": "0.55.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-46600",
+              "package": "golang.org/x/net",
+              "installed": "v0.43.0",
+              "fixed": "0.56.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78661",
+              "package": "golang.org/x/net",
+              "installed": "v0.43.0",
+              "fixed": "0.62.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-78669",
+              "package": "golang.org/x/net",
+              "installed": "v0.43.0",
+              "fixed": "0.60.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56851",
+              "package": "golang.org/x/text",
+              "installed": "v0.28.0",
+              "fixed": "0.41.0",
+              "severity": "HIGH"
+            },
+            {
+              "id": "CVE-2026-56852",
+              "package": "golang.org/x/text",
+              "installed": "v0.28.0",
+              "fixed": "0.39.0",
+              "severity": "HIGH"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "after": {
+    "image-admin": {
+      "id": "sha256:6ff7df93397174b2dc6c3781a39a7a0e5905250207ef4d37d4a7a6a84e494c44",
+      "artifact": "tero-remediated/admin:local",
+      "targets": [
+        {
+          "target": "tero-remediated/admin:local (alpine 3.24.4)",
+          "type": "alpine",
+          "packages": 19,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        },
+        {
+          "target": "Node.js",
+          "type": "node-pkg",
+          "packages": 99,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        }
+      ]
+    },
+    "image-cart": {
+      "id": "sha256:e1490010a90f3cee5af62a523417e35c1a7c93aecac6d082dd1e9cee8c0b9e7c",
+      "artifact": "tero-remediated/cart:local",
+      "targets": [
+        {
+          "target": "tero-remediated/cart:local (alpine 3.24.4)",
+          "type": "alpine",
+          "packages": 38,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        },
+        {
+          "target": "Python",
+          "type": "python-pkg",
+          "packages": 24,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        }
+      ]
+    },
+    "image-catalog": {
+      "id": "sha256:d5c1a00e8a4a3cc17f1197fd3426f85f494de90c5fe12be1c23c8e220341c9c5",
+      "artifact": "tero-remediated/catalog:local",
+      "targets": [
+        {
+          "target": "tero-remediated/catalog:local (alpine 3.24.4)",
+          "type": "alpine",
+          "packages": 17,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        },
+        {
+          "target": "app/catalog",
+          "type": "gobinary",
+          "packages": 58,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        }
+      ]
+    },
+    "image-checkout": {
+      "id": "sha256:4459220935d1e29c9b5503338ebb13e6dedb6bcaa524bf4477f55239771c7b5d",
+      "artifact": "tero-remediated/checkout:local",
+      "targets": [
+        {
+          "target": "tero-remediated/checkout:local (alpine 3.24.4)",
+          "type": "alpine",
+          "packages": 19,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        },
+        {
+          "target": "Node.js",
+          "type": "node-pkg",
+          "packages": 148,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        }
+      ]
+    },
+    "image-orders": {
+      "id": "sha256:014f25fb2450bbc71c380df75d425aacfe455df3c3e12738d0744afcd8e9b86f",
+      "artifact": "tero-remediated/orders:local",
+      "targets": [
+        {
+          "target": "tero-remediated/orders:local (alpine 3.24.4)",
+          "type": "alpine",
+          "packages": 17,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        },
+        {
+          "target": "app/orders",
+          "type": "gobinary",
+          "packages": 38,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        }
+      ]
+    },
+    "image-ui": {
+      "id": "sha256:64de357aaec1f660089f3c7e0c78dd9c9efc11df607624e4a8f4a2f99d306a72",
+      "artifact": "tero-remediated/ui:local",
+      "targets": [
+        {
+          "target": "tero-remediated/ui:local (alpine 3.24.4)",
+          "type": "alpine",
+          "packages": 19,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        },
+        {
+          "target": "Node.js",
+          "type": "node-pkg",
+          "packages": 89,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        }
+      ]
+    },
+    "sca": {
+      "id": null,
+      "artifact": "app/src",
+      "targets": [
+        {
+          "target": "admin/package-lock.json",
+          "type": "npm",
+          "packages": 96,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        },
+        {
+          "target": "cart/requirements.txt",
+          "type": "pip",
+          "packages": 23,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        },
+        {
+          "target": "catalog/go.mod",
+          "type": "gomod",
+          "packages": 67,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        },
+        {
+          "target": "checkout/yarn.lock",
+          "type": "yarn",
+          "packages": 144,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        },
+        {
+          "target": "orders/go.mod",
+          "type": "gomod",
+          "packages": 50,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        },
+        {
+          "target": "ui/package-lock.json",
+          "type": "npm",
+          "packages": 86,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        }
+      ]
+    },
+    "sca-admin": {
+      "id": null,
+      "artifact": "app/src/admin",
+      "targets": [
+        {
+          "target": "package-lock.json",
+          "type": "npm",
+          "packages": 96,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        }
+      ]
+    },
+    "sca-cart": {
+      "id": null,
+      "artifact": "app/src/cart",
+      "targets": [
+        {
+          "target": "requirements.txt",
+          "type": "pip",
+          "packages": 23,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        }
+      ]
+    },
+    "sca-catalog": {
+      "id": null,
+      "artifact": "app/src/catalog",
+      "targets": [
+        {
+          "target": "go.mod",
+          "type": "gomod",
+          "packages": 67,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        }
+      ]
+    },
+    "sca-checkout": {
+      "id": null,
+      "artifact": "app/src/checkout",
+      "targets": [
+        {
+          "target": "yarn.lock",
+          "type": "yarn",
+          "packages": 144,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        }
+      ]
+    },
+    "sca-orders": {
+      "id": null,
+      "artifact": "app/src/orders",
+      "targets": [
+        {
+          "target": "go.mod",
+          "type": "gomod",
+          "packages": 50,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        }
+      ]
+    },
+    "sca-ui": {
+      "id": null,
+      "artifact": "app/src/ui",
+      "targets": [
+        {
+          "target": "package-lock.json",
+          "type": "npm",
+          "packages": 86,
+          "high": 0,
+          "critical": 0,
+          "findings": []
+        }
+      ]
+    }
+  },
+  "validation": {
+    "baseline_coverage_note": "UI and Admin had no lockfile and were absent from the initial SCA. Carts requirements omitted transitive dependencies. Neither absence is treated as a clean scan.",
+    "checkout": {
+      "integration": {
+        "container_exit_code": 0,
+        "passed": 2,
+        "failed": 0
+      },
+      "sca_exit_code": 0,
+      "image_exit_code": 0,
+      "build": "passed; yarn install --immutable; production dependencies only"
+    },
+    "catalog": {
+      "integration": {
+        "container_exit_code": 0,
+        "passed": 2,
+        "failed": 0
+      },
+      "sca_exit_code": 0,
+      "image_exit_code": 0,
+      "build": "passed; golang:1.27.4-alpine + alpine:3.24; go mod tidy without changes, go mod verify, go build, go vet; no test files"
+    },
+    "orders": {
+      "integration": {
+        "container_exit_code": 0,
+        "passed": 2,
+        "failed": 0
+      },
+      "sca_exit_code": 0,
+      "image_exit_code": 0,
+      "build": "passed; golang:1.27.4-alpine + alpine:3.24; go mod tidy without changes, go mod verify, go build, go vet; no test files"
+    },
+    "ui": {
+      "integration": {
+        "container_exit_code": 0,
+        "passed": 2,
+        "failed": 0
+      },
+      "sca_exit_code": 0,
+      "image_exit_code": 0,
+      "build": "passed; npm ci with package-lock.json generated by npm 10.9.9 (node:22-alpine, --package-lock-only --ignore-scripts); npm, npx and yarn removed from the runtime stage"
+    },
+    "admin": {
+      "integration": "not covered by the integration suite; see functional_check",
+      "functional_check": {
+        "method": "node:22-alpine container on the Compose network against admin, catalog and postgres started from app/docker-compose.yml with ephemeral credentials; HTTP requests with fetch",
+        "steps": [
+          "GET /admin/api/products without session -> 401",
+          "POST /auth/login wrong password -> 401",
+          "POST /auth/login -> 200 and HttpOnly token cookie",
+          "GET /auth/me -> 200",
+          "GET /admin/api/products -> 200 (11 products)",
+          "POST /admin/api/products -> 201",
+          "GET catalog /catalog/products/{id} -> 200 with the new product",
+          "PUT /admin/api/products/{id} -> 200 and changes listed",
+          "DELETE /admin/api/products/{id} -> 200 and product no longer listed",
+          "GET /admin/api/orders -> 200",
+          "POST /auth/logout -> 200"
+        ],
+        "passed": 11,
+        "failed": 0,
+        "exit_code": 0
+      },
+      "sca_exit_code": 0,
+      "image_exit_code": 0,
+      "build": "passed; npm ci with package-lock.json generated by npm 10.9.9 (node:22-alpine, --package-lock-only --ignore-scripts); npm, npx and yarn removed from the runtime stage"
+    },
+    "cart": {
+      "integration": {
+        "container_exit_code": 0,
+        "passed": 2,
+        "failed": 0,
+        "runs_after_hash_pinning": "3 runs: the first failed 0/2 in the readiness hook (UI proxy returned 504 for /api/catalog/products for 90 s; catalog logs were not captured, cause not determined); the next two passed 2/2 with the same images"
+      },
+      "sca_exit_code": 0,
+      "image_exit_code": 0,
+      "build": "passed (no cache); python:3.12-alpine multi-stage, non-root (uid 1000); apk upgrade applies krb5-libs 1.22.3-r0 and zlib 1.4-r0; pip install --require-hashes --no-deps --only-binary from requirements.txt compiled with pip-compile --generate-hashes (23 pinned packages with hashes = 23 installed); fastapi 0.163.1, starlette 1.10.0, prometheus-fastapi-instrumentator 8.1.0",
+      "base_image_decision": "python:3.12-slim (debian 13.7) carried 47 HIGH findings without a fix; python:3.12-alpine had 16 HIGH in krb5-libs, all fixed by apk upgrade",
+      "hash_pinning": {
+        "reason": "SonarCloud quality gate failed on PR #62 (docker:S8544, app/src/cart/Dockerfile: Python dependencies installed without verified hashes; new_security_rating 3, threshold 1)",
+        "pip_compile": "7.7.0, --generate-hashes; same 23 versions as before, 609 sha256 hashes",
+        "tamper_check": "one hash altered in a temporary copy: pip install --require-hashes exits 1 (THESE PACKAGES DO NOT MATCH THE HASHES FROM THE REQUIREMENTS FILE); the altered file never entered the repository",
+        "sca_packages_detected": 23,
+        "sonarcloud_recheck": "pending: needs a new analysis on GitHub Actions"
+      }
+    },
+    "sca_coverage": {
+      "exit_code": 0,
+      "note": "trivy fs app/src detects the six services: admin/package-lock.json, cart/requirements.txt (transitive dependencies pinned), catalog/go.mod, checkout/yarn.lock, orders/go.mod, ui/package-lock.json"
+    },
+    "after_scans": {
+      "trivy": "0.76.2",
+      "database_updated_at": "2026-11-16T18:50:18Z",
+      "recheck": "SCA of the committed tree and the six recorded image IDs rescanned after the last change: exit code 0, 0 HIGH/CRITICAL",
+      "recheck_after_hash_pinning": "trivy fs app/src (six targets) and the rebuilt cart image: exit code 0, 0 HIGH/CRITICAL (report created 2026-11-17T00:21Z, same database); the other five images were not rebuilt or rescanned because their sources did not change"
+    },
+    "negative_case": {
+      "scope": "local, Trivy 0.76.2 with the same options as the CI gates (--severity CRITICAL,HIGH --ignore-unfixed=false)",
+      "fixture": "urllib3==1.26.4 appended to cart/requirements.txt in a temporary copy of the tree; never committed",
+      "sca": {
+        "report_exit_code": 0,
+        "gate_exit_code": 1,
+        "target": "cart/requirements.txt",
+        "high": 8,
+        "critical": 0
+      },
+      "image_cart": {
+        "report_exit_code": 0,
+        "gate_exit_code": 1,
+        "target": "Python (python-pkg)",
+        "high": 8,
+        "critical": 0
+      },
+      "findings": [
+        "CVE-2021-33503",
+        "CVE-2023-43804",
+        "CVE-2025-66418",
+        "CVE-2025-66471",
+        "CVE-2026-21441",
+        "CVE-2026-44431",
+        "CVE-2026-97687",
+        "CVE-2026-97689"
+      ],
+      "reports_written_when_gate_fails": [
+        "trivy-sca.json",
+        "trivy-sca.txt",
+        "trivy-image.json",
+        "trivy-image.txt"
+      ]
+    },
+    "workflow": {
+      "actionlint_exit_code": 0,
+      "image_id_preserved_after_docker_save_load": true,
+      "pending_github_actions": [
+        "full pipeline green on the final commit (including the SonarCloud quality gate after the Cart hash pinning)",
+        "artifact upload when a Trivy gate fails",
+        "publish skipped because a needed job failed on a push to main",
+        "publish of the approved images to GHCR"
+      ],
+      "github_actions_pr_62": {
+        "run_id": 43986134260,
+        "event": "pull_request",
+        "commit": "86576c47c9250603646e7daeafdb0fb184b7fdd7",
+        "conclusion": "failure",
+        "jobs": {
+          "gitleaks": "success",
+          "sast": "success",
+          "sca": "success",
+          "build": "success (6/6: admin, cart, catalog, checkout, orders, ui)",
+          "integration": "success",
+          "quality": "failure",
+          "publish": "skipped (pull_request event, by design)"
+        },
+        "quality_gate": "sonarqube-scan-action@v8 ran SonarScanner CLI 8.4.0 with sonar.qualitygate.wait=true; QUALITY GATE STATUS: FAILED, scanner exit code 3; only failing condition new_security_rating (1 new vulnerability, docker:S8544 in app/src/cart/Dockerfile)",
+        "artifacts": [
+          "trivy-sca",
+          "trivy-image-<service> (6)",
+          "image-<service> (6)",
+          "integration-results"
+        ]
+      }
+    }
+  }
+}
