@@ -17,12 +17,12 @@ output "private_subnet_ids" {
 
 output "ecr_repository_urls" {
   description = "URL de cada repositorio ECR, por servicio. El pipeline hace push acá."
-  value       = module.ecr.repository_urls
+  value       = local.ecr_repository_urls
 }
 
 output "alb_url" {
   description = "URL pública de la tienda en este ambiente."
-  value       = "http://${module.ecs.alb_dns_name}"
+  value       = "${var.certificate_arn == null ? "http" : "https"}://${module.ecs.alb_dns_name}"
 }
 
 output "ecs_cluster_name" {

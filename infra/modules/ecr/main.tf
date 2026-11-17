@@ -4,8 +4,9 @@
 resource "aws_ecr_repository" "this" {
   for_each = toset(var.services)
 
-  name                 = "${var.name_prefix}-${each.key}"
-  image_tag_mutability = "MUTABLE"
+  name = "${var.name_prefix}-${each.key}"
+  # El tag es el SHA del commit: inmutable, así un SHA siempre apunta a la imagen que aprobó el CI.
+  image_tag_mutability = "IMMUTABLE"
 
   # Escaneo de vulnerabilidades al hacer push (complementa a Trivy en el pipeline).
   image_scanning_configuration {

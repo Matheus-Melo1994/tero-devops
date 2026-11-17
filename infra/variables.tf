@@ -33,6 +33,31 @@ variable "availability_zones" {
   type        = list(string)
 }
 
+# ---------- Recursos de la cuenta y permisos ----------
+variable "manage_shared_resources" {
+  description = <<-EOT
+    true en un solo ambiente por cuenta (Dev): su estado crea y administra los recursos que comparten los
+    tres ambientes (los repositorios ECR). false = solo los lee.
+  EOT
+  type        = bool
+  default     = false
+}
+
+variable "existing_iam_role_name" {
+  description = <<-EOT
+    Rol IAM existente para ECS y Lambda. En AWS Academy (Learner Lab) no se pueden crear roles y se usa
+    LabRole. null = Terraform crea roles propios con permisos mínimos.
+  EOT
+  type        = string
+  default     = null
+}
+
+variable "certificate_arn" {
+  description = "Certificado de ACM para servir HTTPS en el ALB (80 redirige a 443). null = solo HTTP."
+  type        = string
+  default     = null
+}
+
 variable "services" {
   description = "Nombres de los microservicios de Tero; un repositorio ECR y un servicio ECS por cada uno."
   type        = list(string)

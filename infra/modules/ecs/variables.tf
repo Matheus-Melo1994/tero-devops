@@ -86,6 +86,18 @@ variable "db_init" {
   default = null
 }
 
+variable "iam_role_arn" {
+  description = "Rol existente para ejecución y tarea (LabRole en AWS Academy). null = el módulo crea roles propios con permisos mínimos."
+  type        = string
+  default     = null
+}
+
+variable "certificate_arn" {
+  description = "Certificado de ACM para el listener HTTPS del ALB. null = solo HTTP en el puerto 80."
+  type        = string
+  default     = null
+}
+
 variable "log_retention_days" {
   description = "Días de retención de logs en CloudWatch."
   type        = number

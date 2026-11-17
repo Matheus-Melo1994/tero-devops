@@ -3,6 +3,13 @@
 
 locals {
   public_services = { for k, s in var.services : k => s if s.public }
+
+  # Con un rol existente (LabRole en AWS Academy) el módulo no crea roles ni políticas.
+  create_roles       = var.iam_role_arn == null
+  execution_role_arn = local.create_roles ? aws_iam_role.execution[0].arn : var.iam_role_arn
+  task_role_arn      = local.create_roles ? aws_iam_role.task[0].arn : var.iam_role_arn
+
+  https = var.certificate_arn != null
 }
 
 # ---------- Cluster ----------
@@ -61,12 +68,16 @@ data "aws_iam_policy_document" "ecs_assume" {
 
 # Rol de ejecución: lo usa ECS para bajar la imagen, escribir logs y leer secretos al arrancar la tarea.
 resource "aws_iam_role" "execution" {
+  count = local.create_roles ? 1 : 0
+
   name               = "${var.name_prefix}-ecs-execution"
   assume_role_policy = data.aws_iam_policy_document.ecs_assume.json
 }
 
 resource "aws_iam_role_policy_attachment" "execution_base" {
-  role       = aws_iam_role.execution.name
+  count = local.create_roles ? 1 : 0
+
+  role       = aws_iam_role.execution[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
@@ -79,10 +90,10 @@ locals {
 }
 
 resource "aws_iam_role_policy" "execution_secrets" {
-  count = local.has_secrets ? 1 : 0
+  count = local.create_roles && local.has_secrets ? 1 : 0
 
   name = "${var.name_prefix}-ecs-read-secrets"
-  role = aws_iam_role.execution.id
+  role = aws_iam_role.execution[0].id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -96,6 +107,8 @@ resource "aws_iam_role_policy" "execution_secrets" {
 
 # Rol de tarea: lo usa la app en runtime. Hoy sin permisos; se amplía si un servicio necesita llamar a AWS.
 resource "aws_iam_role" "task" {
+  count = local.create_roles ? 1 : 0
+
   name               = "${var.name_prefix}-ecs-task"
   assume_role_policy = data.aws_iam_policy_document.ecs_assume.json
 }
@@ -133,7 +146,31 @@ resource "aws_lb_listener" "http" {
   port              = 80
   protocol          = "HTTP"
 
-  # Por defecto va a ui; admin se enruta por path abajo.
+  # Sin certificado, por defecto va a ui (admin se enruta por path abajo). Con certificado, redirige a HTTPS.
+  default_action {
+    type             = local.https ? "redirect" : "forward"
+    target_group_arn = local.https ? null : aws_lb_target_group.public["ui"].arn
+
+    dynamic "redirect" {
+      for_each = local.https ? [1] : []
+      content {
+        port        = "443"
+        protocol    = "HTTPS"
+        status_code = "HTTP_301"
+      }
+    }
+  }
+}
+
+resource "aws_lb_listener" "https" {
+  count = local.https ? 1 : 0
+
+  load_balancer_arn = aws_lb.this.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  certificate_arn   = var.certificate_arn
+
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.public["ui"].arn
@@ -143,7 +180,7 @@ resource "aws_lb_listener" "http" {
 resource "aws_lb_listener_rule" "by_path" {
   for_each = { for k, s in local.public_services : k => s if s.path != "/" }
 
-  listener_arn = aws_lb_listener.http.arn
+  listener_arn = local.https ? aws_lb_listener.https[0].arn : aws_lb_listener.http.arn
   priority     = 10 + index(keys(local.public_services), each.key)
 
   action {
@@ -184,8 +221,8 @@ resource "aws_ecs_task_definition" "this" {
   network_mode             = "awsvpc"
   cpu                      = each.value.cpu
   memory                   = each.value.memory
-  execution_role_arn       = aws_iam_role.execution.arn
-  task_role_arn            = aws_iam_role.task.arn
+  execution_role_arn       = local.execution_role_arn
+  task_role_arn            = local.task_role_arn
 
   container_definitions = jsonencode(concat(
     each.value.db_init ? [merge(local.db_init_container, {
@@ -267,10 +304,10 @@ resource "aws_ecs_service" "this" {
     rollback = true
   }
 
-  depends_on = [aws_lb_listener.http]
+  # Los servicios públicos tardan en registrarse en el ALB; sin gracia, ECS los reemplazaría antes del primer health check.
+  health_check_grace_period_seconds = each.value.public ? 60 : null
 
-  lifecycle {
-    # El pipeline actualiza la task definition; Terraform no debe revertirla.
-    ignore_changes = [task_definition]
-  }
+  # El despliegue es este mismo recurso: el pipeline aplica Terraform con image_tag = SHA aprobado, se crea
+  # una revisión nueva de la task definition y el servicio pasa a usarla. No hay un segundo camino que la cambie.
+  depends_on = [aws_lb_listener.http, aws_lb_listener.https]
 }

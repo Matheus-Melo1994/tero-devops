@@ -12,11 +12,42 @@ module "network" {
   availability_zones = var.availability_zones
 }
 
+# ECR es de la cuenta, no de un ambiente: Dev, Test y Prod despliegan la misma imagen por SHA, sin
+# reconstruirla. Los repositorios los crea y administra el estado del ambiente con
+# manage_shared_resources = true (Dev); los demás ambientes los leen.
 module "ecr" {
   source = "./modules/ecr"
+  count  = var.manage_shared_resources ? 1 : 0
 
   name_prefix = var.project
   services    = var.services
+}
+
+# Los repositorios se crearon cuando el módulo no tenía count: se conservan en el estado, sin recrearlos.
+moved {
+  from = module.ecr
+  to   = module.ecr[0]
+}
+
+data "aws_ecr_repository" "shared" {
+  for_each = var.manage_shared_resources ? toset([]) : toset(var.services)
+
+  name = "${var.project}-${each.key}"
+}
+
+# Rol existente para ECS y Lambda cuando la cuenta no permite crear roles (LabRole en AWS Academy).
+data "aws_iam_role" "existing" {
+  count = var.existing_iam_role_name == null ? 0 : 1
+
+  name = var.existing_iam_role_name
+}
+
+locals {
+  ecr_repository_urls = var.manage_shared_resources ? module.ecr[0].repository_urls : {
+    for k, r in data.aws_ecr_repository.shared : k => r.repository_url
+  }
+
+  existing_iam_role_arn = var.existing_iam_role_name == null ? null : data.aws_iam_role.existing[0].arn
 }
 
 # PostgreSQL, Redis y los secretos (issue #34). Las contraseñas se generan dentro del módulo.
@@ -126,7 +157,7 @@ locals {
   # el tag (SHA aprobado por CI) lo agrega el módulo ECS. Un repositorio inexistente falla en el plan.
   service_definitions = {
     for name, cfg in local.services_config : name => merge(cfg, {
-      image = module.ecr.repository_urls[try(cfg.image, name)]
+      image = local.ecr_repository_urls[try(cfg.image, name)]
     })
   }
 }
@@ -144,6 +175,8 @@ module "ecs" {
   services_security_group_id = module.network.services_security_group_id
   image_tag                  = var.image_tag
   services                   = local.service_definitions
+  iam_role_arn               = local.existing_iam_role_arn
+  certificate_arn            = var.certificate_arn
 
   # Crea catalogdb, cartdb y cart_items antes de que arranquen los servicios que usan Postgres.
   db_init = {
