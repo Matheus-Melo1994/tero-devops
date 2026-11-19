@@ -58,7 +58,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   # 5.1 SCA: escanea dependencias (go.sum, yarn.lock, package-lock.json, requirements.txt).
-  # Gate: bloquea cualquier CRITICAL/HIGH, tenga o no parche (ignore-unfixed: false).
+  # Gate: bloquea cualquier CRITICAL/HIGH, tenga o no parche (ignore-unfixed: false), salvo las excepciones
+  # revisadas de .trivyignore.yaml (una por CVE, con motivo y vencimiento).
   # 1) reporte JSON completo para evidencia; 2) gate con el código de salida real de Trivy.
   sca:
     name: Dependencias (Trivy fs)
@@ -70,6 +71,7 @@ jobs:
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           version: v0.76.2
+          trivyignores: .trivyignore.yaml
           scan-type: fs
           scan-ref: app/src
           severity: CRITICAL,HIGH
@@ -81,6 +83,7 @@ jobs:
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           version: v0.76.2
+          trivyignores: .trivyignore.yaml
           scan-type: fs
           scan-ref: app/src
           severity: CRITICAL,HIGH
@@ -132,6 +135,7 @@ jobs:
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           version: v0.76.2
+          trivyignores: .trivyignore.yaml
           scan-type: image
           image-ref: ${{ env.IMAGE }}
           severity: CRITICAL,HIGH
@@ -143,6 +147,7 @@ jobs:
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           version: v0.76.2
+          trivyignores: .trivyignore.yaml
           scan-type: image
           image-ref: ${{ env.IMAGE }}
           severity: CRITICAL,HIGH

@@ -17,14 +17,12 @@ output "private_subnet_ids" {
 
 output "ecr_repository_urls" {
   description = "URL de cada repositorio ECR, por servicio. El pipeline hace push acá."
-  value       = module.ecr.repository_urls
+  value       = local.ecr_repository_urls
 }
-
-# ---------- Agregar al final de infra/outputs.tf ----------
 
 output "alb_url" {
   description = "URL pública de la tienda en este ambiente."
-  value       = "http://${module.ecs.alb_dns_name}"
+  value       = "${var.certificate_arn == null ? "http" : "https"}://${module.ecs.alb_dns_name}"
 }
 
 output "ecs_cluster_name" {
@@ -40,4 +38,43 @@ output "ecs_service_names" {
 output "log_group_names" {
   description = "Log groups de CloudWatch por servicio."
   value       = module.ecs.log_group_names
+}
+
+output "db_host" {
+  description = "Endpoint de PostgreSQL (solo alcanzable desde las subnets privadas)."
+  value       = module.data.db_host
+}
+
+output "redis_url" {
+  description = "URL de Redis que usa checkout."
+  value       = module.data.redis_url
+}
+
+output "secret_arns" {
+  description = "ARN de los secretos del ambiente. El valor se lee con: aws secretsmanager get-secret-value --secret-id <arn>."
+  value = {
+    db_password      = module.data.db_password_secret_arn
+    admin_password   = module.data.admin_password_secret_arn
+    admin_jwt_secret = module.data.admin_jwt_secret_arn
+  }
+}
+
+output "dashboard_name" {
+  description = "Dashboard operativo del ambiente en CloudWatch."
+  value       = module.observability.dashboard_name
+}
+
+output "alarm_names" {
+  description = "Alarmas del ambiente; avisan al tópico alarm_topic_arn."
+  value       = module.observability.alarm_names
+}
+
+output "alarm_topic_arn" {
+  description = "Tópico SNS de las alarmas (suscribir un correo con alarm_email)."
+  value       = module.observability.alarm_topic_arn
+}
+
+output "synthetic_function_name" {
+  description = "Lambda del chequeo sintético. Prueba manual: aws lambda invoke --function-name <nombre> out.json."
+  value       = module.observability.synthetic_function_name
 }

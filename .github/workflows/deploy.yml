@@ -1,0 +1,168 @@
+# Despliegue continuo: Dev → Test → Prod con la misma imagen que aprobó el CI.
+#
+# Arranca solo cuando el workflow CI terminó bien en un push a main: ese CI ya corrió secretos (Gitleaks),
+# SAST (Semgrep), calidad (SonarCloud), SCA (Trivy fs), build + escaneo de imagen, pruebas de integración y
+# publicó tero-<servicio>:<sha> en GHCR. Acá no se construye nada: se copia ese manifiesto a ECR sin
+# tocarlo (mismo digest) y cada ambiente despliega ese SHA aplicando Terraform.
+#
+# Promoción: Test solo corre si Dev quedó estable y pasó el chequeo sintético; Prod, si Test también y
+# alguien aprueba el environment "prod" en GitHub (regla de protección del environment).
+#
+# Configuración en GitHub (Settings → Environments: dev, test, prod):
+#   variables   TF_STATE_BUCKET   bucket del estado de Terraform de la cuenta
+#   secretos    AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN: credenciales temporales de
+#               AWS Academy, que vencen al cerrar la sesión del lab (renovarlas antes de cada despliegue).
+
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: "SHA completo de un commit de main cuyo CI terminó bien (re-despliegue o rollback)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+env:
+  SERVICES: "admin cart catalog checkout orders ui"
+  GHCR_PREFIX: ghcr.io/matheus-melo1994/tero-
+
+jobs:
+  aprobado:
+    name: Imagen aprobada por CI
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    permissions:
+      actions: read
+      contents: read
+      packages: read
+    outputs:
+      sha: ${{ steps.sha.outputs.sha }}
+      digests: ${{ steps.digests.outputs.digests }}
+    steps:
+      - name: SHA a desplegar
+        id: sha
+        env:
+          INPUT_SHA: ${{ inputs.sha }}
+          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          sha="${INPUT_SHA:-$RUN_SHA}"
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::SHA inválido: $sha"; exit 1; }
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+      # Un despliegue manual también tiene que apuntar a un commit de main con el CI aprobado.
+      - name: Verificar que el CI de ese SHA terminó bien en main
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ steps.sha.outputs.sha }}
+        run: |
+          ok="$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/ci.yml/runs?head_sha=${SHA}&branch=main&event=push&status=success" --jq '.total_count')"
+          [ "$ok" -ge 1 ] || { echo "::error::El CI de $SHA no terminó bien en un push a main"; exit 1; }
+
+      - name: Login a GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Digest de cada imagen publicada
+        id: digests
+        env:
+          SHA: ${{ steps.sha.outputs.sha }}
+        run: |
+          json='{}'
+          for s in $SERVICES; do
+            d="$(docker buildx imagetools inspect "${GHCR_PREFIX}${s}:${SHA}" --format '{{json .Manifest}}' | jq -r '.digest')"
+            [[ "$d" =~ ^sha256:[0-9a-f]{64}$ ]] || { echo "::error::No hay imagen ${s}:${SHA} en GHCR"; exit 1; }
+            echo "$s $d"
+            json="$(jq -c --arg s "$s" --arg d "$d" '. + {($s): $d}' <<<"$json")"
+          done
+          echo "digests=$json" >> "$GITHUB_OUTPUT"
+
+  # ECR es compartido por los tres ambientes: se copia una sola vez, con las credenciales de Dev.
+  promover-imagenes:
+    name: Copiar a ECR sin reconstruir
+    needs: aprobado
+    runs-on: ubuntu-latest
+    environment: dev
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Credenciales temporales de AWS Academy
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      - name: Copiar el manifiesto de GHCR a ECR (mismo digest)
+        env:
+          SHA: ${{ needs.aprobado.outputs.sha }}
+          DIGESTS: ${{ needs.aprobado.outputs.digests }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          command -v skopeo >/dev/null || { sudo apt-get update -q && sudo apt-get install -y -q skopeo; }
+          registry="$(aws sts get-caller-identity --query Account --output text).dkr.ecr.us-east-1.amazonaws.com"
+          aws ecr get-login-password | skopeo login --username AWS --password-stdin "$registry"
+          echo "$GHCR_TOKEN" | skopeo login --username "$GITHUB_ACTOR" --password-stdin ghcr.io
+          for s in $SERVICES; do
+            want="$(jq -r --arg s "$s" '.[$s]' <<<"$DIGESTS")"
+            have="$(aws ecr describe-images --repository-name "tero-$s" --image-ids "imageTag=$SHA" \
+              --query 'imageDetails[0].imageDigest' --output text 2>/dev/null || true)"
+            if [ "$have" = "$want" ]; then echo "$s: ya está en ECR ($want)"; continue; fi
+            # Los tags de ECR son inmutables: un SHA con otro digest es un error, no se pisa.
+            [ -z "$have" ] || [ "$have" = "None" ] || { echo "::error::$s:$SHA ya existe en ECR con otro digest ($have)"; exit 1; }
+            skopeo copy --preserve-digests "docker://${GHCR_PREFIX}${s}@${want}" "docker://${registry}/tero-${s}:${SHA}"
+            got="$(aws ecr describe-images --repository-name "tero-$s" --image-ids "imageTag=$SHA" --query 'imageDetails[0].imageDigest' --output text)"
+            [ "$got" = "$want" ] || { echo "::error::$s quedó con $got en ECR, se esperaba $want"; exit 1; }
+            echo "$s: copiada ($got)"
+          done
+
+  dev:
+    needs: [aprobado, promover-imagenes]
+    uses: ./.github/workflows/deploy-env.yml
+    with:
+      environment: dev
+      sha: ${{ needs.aprobado.outputs.sha }}
+      digests: ${{ needs.aprobado.outputs.digests }}
+    secrets: inherit
+    permissions:
+      contents: read
+
+  test:
+    needs: [aprobado, dev]
+    uses: ./.github/workflows/deploy-env.yml
+    with:
+      environment: test
+      sha: ${{ needs.aprobado.outputs.sha }}
+      digests: ${{ needs.aprobado.outputs.digests }}
+    secrets: inherit
+    permissions:
+      contents: read
+
+  prod:
+    needs: [aprobado, test]
+    uses: ./.github/workflows/deploy-env.yml
+    with:
+      environment: prod
+      sha: ${{ needs.aprobado.outputs.sha }}
+      digests: ${{ needs.aprobado.outputs.digests }}
+    secrets: inherit
+    permissions:
+      contents: read

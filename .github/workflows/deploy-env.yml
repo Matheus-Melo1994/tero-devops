@@ -1,0 +1,108 @@
+# Despliega un ambiente (dev, test o prod) con un SHA ya aprobado. Lo llama deploy.yml.
+#
+# 1. Verifica que las seis imágenes del SHA estén en ECR con el digest que publicó el CI.
+# 2. terraform plan + apply con image_tag = SHA: nuevas task definitions y los servicios pasan a usarlas.
+#    El circuit breaker de ECS revierte solo un despliegue que no levanta.
+# 3. Gate de salida: los seis servicios estables, con la task definition de este SHA y el rollout
+#    COMPLETED (un rollback cuenta como falla), y el chequeo sintético pasando contra el ALB.
+#    Si algo falla, el job falla y el siguiente ambiente no se despliega.
+
+name: Deploy (ambiente)
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      sha:
+        required: true
+        type: string
+      digests:
+        description: "JSON servicio → digest publicado en GHCR"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Desplegar ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    concurrency:
+      group: deploy-${{ inputs.environment }}
+      cancel-in-progress: false
+    env:
+      ENVIRONMENT: ${{ inputs.environment }}
+      SHA: ${{ inputs.sha }}
+      DIGESTS: ${{ inputs.digests }}
+      TF_IN_AUTOMATION: "1"
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      # La infraestructura sale del mismo commit que las imágenes: el SHA que aprobó el CI en main.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.sha }}
+
+      - name: Credenciales temporales de AWS Academy
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      - name: Imágenes en ECR con el digest aprobado
+        run: |
+          for s in $(jq -r 'keys[]' <<<"$DIGESTS"); do
+            want="$(jq -r --arg s "$s" '.[$s]' <<<"$DIGESTS")"
+            got="$(aws ecr describe-images --repository-name "tero-$s" --image-ids "imageTag=$SHA" --query 'imageDetails[0].imageDigest' --output text)"
+            [ "$got" = "$want" ] || { echo "::error::tero-$s:$SHA en ECR es $got, se esperaba $want"; exit 1; }
+          done
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+          terraform_wrapper: false
+
+      - name: Init (estado propio del ambiente)
+        env:
+          TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+        run: |
+          [ -n "$TF_STATE_BUCKET" ] || { echo "::error::Falta la variable TF_STATE_BUCKET del environment"; exit 1; }
+          terraform init -input=false -backend-config="bucket=$TF_STATE_BUCKET" -backend-config="key=$ENVIRONMENT/terraform.tfstate"
+
+      - name: Plan
+        run: terraform plan -input=false -var-file="environments/$ENVIRONMENT.tfvars" -var="image_tag=$SHA" -out=deploy.tfplan
+
+      - name: Apply
+        run: terraform apply -input=false deploy.tfplan
+
+      - name: Servicios estables con este SHA
+        run: |
+          cluster="$(terraform output -raw ecs_cluster_name)"
+          services="$(terraform output -json ecs_service_names | jq -r '.[]')"
+          # shellcheck disable=SC2086
+          aws ecs wait services-stable --cluster "$cluster" --services $services
+          for svc in $services; do
+            read -r td rollout running desired < <(aws ecs describe-services --cluster "$cluster" --services "$svc" \
+              --query "services[0].[deployments[?status=='PRIMARY']|[0].taskDefinition, deployments[?status=='PRIMARY']|[0].rolloutState, runningCount, desiredCount]" --output text)
+            image="$(aws ecs describe-task-definition --task-definition "$td" --query "taskDefinition.containerDefinitions[?name=='$svc'].image | [0]" --output text)"
+            echo "$svc: $image rollout=$rollout $running/$desired"
+            [[ "$image" == *":$SHA" ]] || { echo "::error::$svc corre $image, no $SHA (¿rollback del circuit breaker?)"; exit 1; }
+            if [ "$rollout" != "COMPLETED" ] || [ "$running" != "$desired" ]; then
+              echo "::error::$svc no completó el despliegue"; exit 1
+            fi
+          done
+
+      - name: Chequeo sintético contra el ALB
+        run: |
+          fn="$(terraform output -raw synthetic_function_name)"
+          aws lambda invoke --function-name "$fn" --cli-binary-format raw-in-base64-out --payload '{}' synthetic.json >/dev/null
+          jq . synthetic.json
+          [ "$(jq -r '.all_passed' synthetic.json)" = "true" ] || { echo "::error::El chequeo sintético falló en $ENVIRONMENT"; exit 1; }
+          echo "Tienda: $(terraform output -raw alb_url)" >> "$GITHUB_STEP_SUMMARY"

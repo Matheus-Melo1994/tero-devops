@@ -18,6 +18,11 @@ output "alb_security_group_id" {
   value       = aws_security_group.alb.id
 }
 
+output "internal_alb_security_group_id" {
+  description = "Security group del ALB interno entre servicios."
+  value       = aws_security_group.internal_alb.id
+}
+
 output "services_security_group_id" {
   description = "Security group de los servicios ECS."
   value       = aws_security_group.services.id

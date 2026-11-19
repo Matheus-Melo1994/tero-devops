@@ -1,0 +1,3 @@
+# El paquete de la Lambda se arma desde este archivo: con LF siempre, el hash del zip es el mismo en
+# Windows y en el pipeline (Linux), y Terraform no la redespliega por un cambio de fin de línea.
+*.py text eol=lf
