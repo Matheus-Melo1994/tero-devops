@@ -1,0 +1,13 @@
+------------------------------------------------
+|                DescribeAlarms                |
++----------------------------------------+-----+
+|  tero-dev-admin-no-healthy-targets     |  OK |
+|  tero-dev-alb-target-5xx               |  OK |
+|  tero-dev-application-errors           |  OK |
+|  tero-dev-carts-no-healthy-targets     |  OK |
+|  tero-dev-catalog-no-healthy-targets   |  OK |
+|  tero-dev-checkout-no-healthy-targets  |  OK |
+|  tero-dev-orders-no-healthy-targets    |  OK |
+|  tero-dev-synthetic-failing            |  OK |
+|  tero-dev-ui-no-healthy-targets        |  OK |
++----------------------------------------+-----+

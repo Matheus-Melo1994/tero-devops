@@ -1,0 +1,10 @@
+---------------------------------------------
+|             DescribeServices              |
++-----------+---------+----+----+-----------+
+|  admin    |  ACTIVE |  1 |  1 |  FARGATE  |
+|  carts    |  ACTIVE |  1 |  1 |  FARGATE  |
+|  catalog  |  ACTIVE |  1 |  1 |  FARGATE  |
+|  checkout |  ACTIVE |  1 |  1 |  FARGATE  |
+|  orders   |  ACTIVE |  1 |  1 |  FARGATE  |
+|  ui       |  ACTIVE |  1 |  1 |  FARGATE  |
++-----------+---------+----+----+-----------+
